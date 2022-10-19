@@ -6,6 +6,9 @@ using System.Threading.Tasks;
 
 namespace Delivery2._4
 {
+    /// <summary>
+    /// Типичный курьер.
+    /// </summary>
     internal abstract class Courier
     {
         public int CourierID { get; set; }
@@ -45,6 +48,9 @@ namespace Delivery2._4
                 return time;
             } 
         }
+        /// <summary>
+        /// Задаёт время начала работы курьера.
+        /// </summary>
         protected DateTime CourierScheduleStart()
         {
             DateTime dateTime = DateTime.Today;
@@ -65,6 +71,9 @@ namespace Delivery2._4
             }
             return dateTime;
         }
+        /// <summary>
+        /// Задаёт время конца работы курьера.
+        /// </summary>
         protected DateTime CourierScheduleEnd()
         {
             DateTime dateTime = DateTime.Today;
