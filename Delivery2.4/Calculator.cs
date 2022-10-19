@@ -6,7 +6,10 @@ using System.Threading.Tasks;
 
 namespace Delivery2._4
 {
-    internal class Calculator
+    /// <summary>
+    /// Формулы.
+    /// </summary>
+    internal static class Calculator
     {
         /// <summary>
         /// Переводит дедлайн заказа в минуты.

@@ -6,6 +6,9 @@ using System.Threading.Tasks;
 
 namespace Delivery2._4
 {
+    /// <summary>
+    /// Курьер на велосипеде.
+    /// </summary>
     internal class BikeCourier : Courier
     {
         public BikeCourier(int num)
