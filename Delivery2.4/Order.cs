@@ -17,9 +17,9 @@ namespace Delivery2._4
 
         public double Weigth { get; set; }
 
-        public int DeadLine { get; set; }
+        public DateTime DeadLine { get; set; }
 
-        public int Time { get; set; }
+        public TimeSpan Time { get; set; }
 
         public Courier[] PriorityCouriers = new Courier[Company.quantityC];
 

@@ -16,7 +16,7 @@ namespace Delivery2._4
             Start = start;
             End = end;
             Weigth = weigth;
-            DeadLine = Calculator.TimeToMinute(deadline);
+            DeadLine = DateTime.Today + Calculator.TimeToMinute(deadline);
         }
     }
 }

@@ -14,23 +14,23 @@ namespace Delivery2._4
         /// <summary>
         /// Переводит дедлайн заказа в минуты.
         /// </summary>
-        public static int TimeToMinute(string time)
+        public static TimeSpan TimeToMinute(string time)
         {
             int split = time.IndexOf(":");
             int hour = int.Parse(time.Substring(0, split));
             int minute = int.Parse(time.Substring(split + 1));
-            int timeMinute = (hour * 60) + minute - 480;
+            TimeSpan timeMinute = TimeSpan.FromMinutes((hour * 60) + minute);
             return timeMinute;
         }
-        public static int TimeToWay(Order order, Courier courier)
+        public static TimeSpan TimeToWay(Order order, Courier courier)
         {
-            int time = (int) Math.Round(CoordHelper.GetDistance(order.Start, courier.Start) / courier.Speed * 60);
+            TimeSpan time = TimeSpan.FromMinutes((int) Math.Round(CoordHelper.GetDistance(order.Start, courier.Start) / courier.Speed * 60));
             return time;
         }
 
-        public static int TimeToCompliteOrder(Order order, Courier courier)
+        public static TimeSpan TimeToCompliteOrder(Order order, Courier courier)
         {
-            int time = (int)Math.Round((CoordHelper.GetDistance(order.Start, courier.Start) + order.Distance) / courier.Speed * 60);
+            TimeSpan time = TimeSpan.FromMinutes((int)Math.Round((CoordHelper.GetDistance(order.Start, courier.Start) + order.Distance) / courier.Speed * 60));
             return time;
         }
     }

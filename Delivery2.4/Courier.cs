@@ -37,14 +37,17 @@ namespace Delivery2._4
         /// </summary>
         protected TimeSpan CalculateBusyTime()
         {
+            TimeSpan time = TimeSpan.FromMinutes(0);
             if ((Orders != null) && (Orders.Count > 0))
             {
-                TimeSpan time = TimeSpan.FromMinutes(Orders.Sum(x => x.Time));
+                foreach (Order order in Orders)
+                {
+                    time += order.Time;
+                }
                 return time;
             }
             else
             {
-                TimeSpan time = TimeSpan.FromMinutes(0);
                 return time;
             } 
         }
