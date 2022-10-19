@@ -13,6 +13,7 @@ namespace Delivery2._4
     {
         public BikeCourier(int num)
         {
+            CourierID = Company.CouriersList.Count;
             Name = $"Курьер на велосипеде № {num + 1}";
             Start = CoordHelper.RandCoord();
             Speed = Company.DefaultBikeCurierSpeed;

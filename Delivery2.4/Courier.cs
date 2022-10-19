@@ -6,44 +6,28 @@ using System.Threading.Tasks;
 
 namespace Delivery2._4
 {
-    public interface IComparable
-    {
-        int CompareTo(object obj);
-    }
     /// <summary>
     /// Типичный курьер.
     /// </summary>
-    internal abstract class Courier : IComparable
+    internal abstract class Courier
     {
-        public int CompareTo(object obj)
-        {
-            Courier courier1 = obj as Courier;
-            if (courier1 != null)
-                return this.Profit.CompareTo(courier1.Profit);
-            else
-                throw new Exception("Не то...");
-        }
-        public int CourierID { get; set; }
+        public int CourierID { get; protected set; }
 
-        public string Name { get; set; }
+        public string Name { get; protected set; }
 
-        public Coord Start { get; set; }
+        public Coord Start { get; protected set; }
 
-        public double Capacity { get; set; }
+        public double Capacity { get; protected set; }
 
-        public double Speed { get; set; }
+        public double Speed { get; protected set; }
 
-        public double Price { get; set; }
+        public double Price { get; protected set; }
 
         public DateTime StartTime { get { return CourierScheduleStart(); } }
 
         public DateTime EndTime { get { return CourierScheduleEnd(); } }
 
-        public int Profit { get; set; }
-
-        public int NumberPrioritiCoord { get; set; }
-
-        public List<Order> Orders { get; set; }
+        public List<Order> Orders = new();
 
         public TimeSpan BusyTime { get { return CalculateBusyTime(); } }
         /// <summary>
@@ -63,7 +47,7 @@ namespace Delivery2._4
             else
             {
                 return time;
-            } 
+            }
         }
         /// <summary>
         /// Задаёт время начала работы курьера.
@@ -110,6 +94,42 @@ namespace Delivery2._4
                     break;
             }
             return dateTime;
+        }
+        /// <summary>
+        /// Прикрепляет заказ к курьеру, если это не возможно возвращает false.
+        /// </summary>
+        public bool AttachingOrder(Order order, int numberPriorityCoord, int profit)
+        {
+            //Если заказ хочет прикрепиться в конец, то он прикрепляется.
+            if (numberPriorityCoord == Orders.Count)
+            {
+                order.Time = TimeCalculator.TimeToCompliteOrder(order, this);
+                Orders.Add(order);
+                return true;
+            }
+            //Если заказ менее выгоден, нежели заказ, вместо которого он хочет встать, то курьер от него отказывается(возвращается false).
+            if (profit <= Orders[numberPriorityCoord].Profit)
+            {
+                return false;
+            }
+            //Все заказы начиная с того, вместо которого хочет встать заказ, переходят в список свободных заказов, а заказ встаёт на их место.
+            int quantityOrders = (Orders.Count - numberPriorityCoord);
+            for (int i = 0; i < quantityOrders; i++)
+            {
+                Company.FreeOrders.Add(Orders[^1]);
+                Orders.RemoveAt(Orders.Count - 1);
+            }
+            //Заказу присваиваются его время на выполнение.
+            if (numberPriorityCoord == 0)
+            {
+                order.Time = TimeCalculator.TimeToCompliteOrder(order, this, Start);
+            }
+            else
+            {
+            order.Time = TimeCalculator.TimeToCompliteOrder(order, this, Orders[^1].End);
+            }
+            Orders.Add(order);
+            return true;
         }
     }
 }

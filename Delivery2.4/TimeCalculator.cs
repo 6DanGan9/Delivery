@@ -31,11 +31,19 @@ namespace Delivery2._4
             return time;
         }
         /// <summary>
-        /// Считает, сколько времени курьер потратит на полное выполнение заказа.
+        /// Считает, сколько времени курьер потратит на полное выполнение заказа с начальной координаты.
         /// </summary>
         public static TimeSpan TimeToCompliteOrder(Order order, Courier courier)
         {
             TimeSpan time = TimeSpan.FromMinutes((int)Math.Round((CoordHelper.GetDistance(order.Start, courier.Start) + order.Distance) / courier.Speed * 60));
+            return time;
+        }
+        /// <summary>
+        /// Считает, сколько времени курьер потратит на полное выполнение заказа с заданной коодринаты.
+        /// </summary>
+        public static TimeSpan TimeToCompliteOrder(Order order, Courier courier , Coord start)
+        {
+            TimeSpan time = TimeSpan.FromMinutes((int)Math.Round((CoordHelper.GetDistance(order.Start, start) + order.Distance) / courier.Speed * 60));
             return time;
         }
     }
