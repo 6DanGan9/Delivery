@@ -17,7 +17,7 @@ namespace Delivery2._4
 
         public double Weigth { get; set; }
 
-        public int DeadLine { get; set; }
+        public TimeSpan DeadLine { get; set; }
 
         public int Time { get; set; }
 

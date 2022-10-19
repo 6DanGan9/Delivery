@@ -10,6 +10,7 @@ namespace Delivery2._4
     {
         public ScuterCourier(int num)
         {
+            CourierID = Company.CouriersList.Count;
             Name = $"Курьер на скутере № {num + 1}";
             Start = CoordHelper.RandCoord();
             Speed = Company.DefaultScuterCurierSpeed;

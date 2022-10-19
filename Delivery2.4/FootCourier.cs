@@ -10,6 +10,7 @@ namespace Delivery2._4
     {
         public FootCourier(int num)
         {
+            CourierID = Company.CouriersList.Count;
             Name = $"Пеший курьер № {num + 1}";
             Start = CoordHelper.RandCoord();
             Speed = Company.DefaultFootCurierSpeed;
