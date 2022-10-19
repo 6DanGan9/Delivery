@@ -25,14 +25,14 @@ namespace Delivery2._4
 
         public double Distance { get { return Start.GetDistance(End); } }
         
-        public double Coast { get { return GetOrderPrice(); } }
+        public int Coast { get { return GetOrderPrice(); } }
 
         /// <summary>
         /// Считает стоимость заказа.
         /// </summary>
-        protected double GetOrderPrice()
+        protected int  GetOrderPrice()
         {
-            return Distance * Company.PricePerDistance;
+            return (int)Math.Round(Distance * Company.PricePerDistance);
         }
     }
 }

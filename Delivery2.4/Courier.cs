@@ -6,11 +6,23 @@ using System.Threading.Tasks;
 
 namespace Delivery2._4
 {
+    public interface IComparable
+    {
+        int CompareTo(object obj);
+    }
     /// <summary>
     /// Типичный курьер.
     /// </summary>
-    internal abstract class Courier
+    internal abstract class Courier : IComparable
     {
+        public int CompareTo(object obj)
+        {
+            Courier courier1 = obj as Courier;
+            if (courier1 != null)
+                return this.Profit.CompareTo(courier1.Profit);
+            else
+                throw new Exception("Не то...");
+        }
         public int CourierID { get; set; }
 
         public string Name { get; set; }
@@ -28,6 +40,8 @@ namespace Delivery2._4
         public DateTime EndTime { get { return CourierScheduleEnd(); } }
 
         public int Profit { get; set; }
+
+        public int NumberPrioritiCoord { get; set; }
 
         public List<Order> Orders { get; set; }
 

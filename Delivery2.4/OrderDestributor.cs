@@ -11,10 +11,21 @@ namespace Delivery2._4
     /// </summary>
     internal static class OrderDestributor
     {
+        /// <summary>
+        /// Распределяет заказ.
+        /// </summary>
         public static void Distributoin(OrderForDelivery order)
         {
-            
+            for (int i = 0; i < Company.quantityC; i++)
+            {
+                CourierCalculator.CalculateMaxProfit(order, i);
+            }
+            Courier[] couriers = new Courier[Company.quantityC];
+            Array.Sort(couriers);
         }
+        /// <summary>
+        /// Распределяет заказ.
+        /// </summary>
         public static void Distributoin(OrderForTaking order)
         {
 
