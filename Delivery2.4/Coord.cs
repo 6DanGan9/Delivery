@@ -32,12 +32,5 @@ namespace Delivery2._4
             X = x;
             Y = y;
         }
-        /// <summary>
-        /// Представление координаты ввиде строки.
-        /// </summary>
-        public string ToString()
-        {
-            return $"({X},{Y})";
-        }
     }
 }

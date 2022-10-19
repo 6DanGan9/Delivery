@@ -8,15 +8,13 @@ namespace Delivery2._4
 {
     internal class ScuterCourier : Courier
     {
-        public ScuterCourier(string num)
+        public ScuterCourier(int num)
         {
-            Name = $"Курьер на скутере № {num}";
+            Name = $"Курьер на скутере № {num + 1}";
             Start = CoordHelper.RandCoord();
-            StartTime = CourierScheduleStart();
-            EndTime = CourierScheduleEnd();
-            Speed = Company.DefaultFootCurierSpeed;
-            Capacity = Company.DefaultFootCurierCapacity;
-            Price = Company.DefaultFootCurierPrisePerDistance;
+            Speed = Company.DefaultScuterCurierSpeed;
+            Capacity = Company.DefaultScuterCurierCapacity;
+            Price = Company.DefaultScyterCurierPricePerDistance;
         }
     }
 }

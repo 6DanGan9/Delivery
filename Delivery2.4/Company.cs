@@ -12,22 +12,22 @@ namespace Delivery2._4
 
         public const double DefaultFootCurierSpeed = 7;
         public const double DefaultFootCurierCapacity = 4;
-        public const double DefaultFootCurierPrisePerDistance = 40;
+        public const double DefaultFootCurierPricePerDistance = 40;
 
         public const double DefaultBikeCurierSpeed = 15;
         public const double DefaultBikeCurierCapacity = 6;
-        public const double DefaultBikeCurierPrisePerDistance = 40;
+        public const double DefaultBikeCurierPricePerDistance = 60;
 
         public const double DefaultScuterCurierSpeed = 30;
         public const double DefaultScuterCurierCapacity = 8;
-        public const double DefaultScyterCurierPrisePerDistance = 40;
+        public const double DefaultScyterCurierPricePerDistance = 80;
 
         public const double DefaultCarCurierSpeed = 25;
         public const double DefaultCarCurierCapacity = 60;
-        public const double DefaultCarCurierPrisePerDistance = 40;
+        public const double DefaultCarCurierPricePerDistance = 80;
 
         public static List<Courier> CouriersList = new();
         public static int quantityC;
-        public static Courier[] couriers = new Courier[quantityC];
+        public static Courier[] Couriers = new Courier[quantityC];
     }
 }

@@ -8,15 +8,13 @@ namespace Delivery2._4
 {
     internal class BikeCourier : Courier
     {
-        public BikeCourier(string num)
+        public BikeCourier(int num)
         {
-            Name = $"Курьер на велосипеде № {num}";
+            Name = $"Курьер на велосипеде № {num + 1}";
             Start = CoordHelper.RandCoord();
-            StartTime = CourierScheduleStart();
-            EndTime = CourierScheduleEnd();
-            Speed = Company.DefaultFootCurierSpeed;
-            Capacity = Company.DefaultFootCurierCapacity;
-            Price = Company.DefaultFootCurierPrisePerDistance;
+            Speed = Company.DefaultBikeCurierSpeed;
+            Capacity = Company.DefaultBikeCurierCapacity;
+            Price = Company.DefaultBikeCurierPricePerDistance;
         }
     }
 }

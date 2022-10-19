@@ -8,15 +8,13 @@ namespace Delivery2._4
 {
     internal class CarCourier : Courier
     {
-        public CarCourier(string num)
+        public CarCourier(int num)
         {
-            Name = $"Курьер на машине № {num}";
+            Name = $"Курьер на машине № {num + 1}";
             Start = CoordHelper.RandCoord();
-            StartTime = CourierScheduleStart();
-            EndTime = CourierScheduleEnd();
-            Speed = Company.DefaultFootCurierSpeed;
-            Capacity = Company.DefaultFootCurierCapacity;
-            Price = Company.DefaultFootCurierPrisePerDistance;
+            Speed = Company.DefaultCarCurierSpeed;
+            Capacity = Company.DefaultCarCurierCapacity;
+            Price = Company.DefaultCarCurierPricePerDistance;
         }
     }
 }

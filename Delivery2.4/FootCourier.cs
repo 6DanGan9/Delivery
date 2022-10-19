@@ -8,15 +8,13 @@ namespace Delivery2._4
 {
     internal class FootCourier : Courier
     {
-        public FootCourier(string num)
+        public FootCourier(int num)
         {
-            Name = $"Пеший курьер № {num}";
+            Name = $"Пеший курьер № {num + 1}";
             Start = CoordHelper.RandCoord();
-            StartTime = CourierScheduleStart();
-            EndTime = CourierScheduleEnd();
             Speed = Company.DefaultFootCurierSpeed;
             Capacity = Company.DefaultFootCurierCapacity;
-            Price = Company.DefaultFootCurierPrisePerDistance;
+            Price = Company.DefaultFootCurierPricePerDistance;
         }
     }
 }

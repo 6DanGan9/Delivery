@@ -27,61 +27,22 @@ namespace Delivery2._4
 
         public List<Order> Orders { get; set; }
 
+        public int BusyTime { get { return CalculateBusyTime(); } }
         /// <summary>
         /// Считает суммарное время, которое курьер потратит на выполнение всех заказов в его списке заказов.
         /// </summary>
-        public static int BusyTime(Courier courier)
+        protected  int CalculateBusyTime()
         {
-            int time = 0;
-            if (courier.Orders.Count > 0)
+            if ((Orders != null) && (Orders.Count > 0))
             {
-                for (int i = 0; i < courier.Orders.Count; i++)
-                {
-                    time += courier.Orders[i].Time;
-                }
+                int time = Orders.Sum(x => x.Time);
+                return time;
             }
-            return time;
-        }
-        /// <summary>
-        /// Определяет время начала рабочего дня курьера.
-        /// </summary>
-        protected static int CourierScheduleStart()
-        {
-            int start = 0;
-            switch (Company.CouriersList.Count % 3)
+            else
             {
-                case 0:
-                    break;
-                case 1:
-                    start = 240;
-                    break;
-                case 2:
-                    start = 480;
-                    break;
+                return 0;
             }
-            return start;
+            
         }
-        /// <summary>
-        /// Определяет время конца рабочего дня курьера.
-        /// </summary>
-        protected static int CourierScheduleEnd()
-        {
-            int end = 0;
-            switch (Company.CouriersList.Count % 3)
-            {
-                case 0:
-                    end = 480;
-                    break;
-                case 1:
-                    end = 720;
-                    break;
-                case 2:
-                    end = 960;
-                    break;
-            }
-            return end;
-        }
-        
-        public static int MaxProfit
     }
 }
