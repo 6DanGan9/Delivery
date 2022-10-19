@@ -6,9 +6,6 @@ using System.Threading.Tasks;
 
 namespace Delivery2._4
 {
-    /// <summary>
-    /// Заказ на взятие посылки.
-    /// </summary>
     internal class OrderForTaking : Order
     {
         public OrderForTaking(Coord start, Coord end, string deadline, double weigth)

@@ -30,12 +30,7 @@
             }
             Company.quantityC = quantityFC + quantityBC + quantitySC + quantityCC;
             Company.Couriers = Company.CouriersList.ToArray();
-            var order1 = new OrderForDelivery(CoordHelper.RandCoord(), CoordHelper.RandCoord(), "12:00", 3);
-            var order2 = new OrderForTaking(CoordHelper.RandCoord(), CoordHelper.RandCoord(), "12:00", 7);
-            foreach (var courier in Company.CouriersList)
-            {
-
-            }
+            OrderForDelivery order = new OrderForDelivery(CoordHelper.RandCoord(), CoordHelper.RandCoord(), "9:15", 3);
         }
     }
 }

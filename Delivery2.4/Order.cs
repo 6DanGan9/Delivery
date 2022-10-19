@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 namespace Delivery2._4
 {
     /// <summary>
-    /// Типичный заказ.
+    /// 
     /// </summary>
     internal abstract class Order
     {
@@ -17,7 +17,7 @@ namespace Delivery2._4
 
         public double Weigth { get; set; }
 
-        public TimeSpan DeadLine { get; set; }
+        public int DeadLine { get; set; }
 
         public int Time { get; set; }
 
