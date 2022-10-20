@@ -52,7 +52,7 @@ namespace Delivery2._4
                 {
                     break;
                 }
-                if (i == order.Couriers.Count)
+                if (i == order.Couriers.Count - 1)
                 {
                     Company.RejectedOrders.Add(order);
                 }
