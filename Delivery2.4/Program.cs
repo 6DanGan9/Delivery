@@ -2,6 +2,39 @@
 {
     internal class Program
     {
+        /// <summary>
+        /// Показывает текущую информацию о курьерах и заказах.
+        /// </summary>
+        private static void GetInfo()
+        {
+            int fullProfit = 0;
+            Console.WriteLine("==============================");
+            for (int i = 0; i < Company.quantityC; i++)
+            {
+                if (Company.Couriers[i].Orders.Count > 0)
+                {
+                    Console.Write($"{Company.Couriers[i].Name} будет выполнять заказ(ы):");
+                    for (int j = 0; j < Company.Couriers[i].Orders.Count; j++)
+                    {
+                        fullProfit += Company.Couriers[i].Orders[j].Profit;
+                        Console.Write($" {Company.Couriers[i].Orders[j].Id} ({Company.Couriers[i].Orders[j].Profit})");
+                    }
+                    Console.Write($" Суммарное время:{Company.Couriers[i].BusyTime}");
+                    Console.WriteLine(".");
+                }
+            }
+            if (Company.RejectedOrders.Count > 0)
+            {
+                Console.Write($" Непринятые заказы:");
+                for (int i = 0; i < Company.RejectedOrders.Count; i++)
+                {
+                    Console.Write($" {Company.RejectedOrders[i].Id}");
+                }
+                Console.WriteLine(".");
+            }
+            Console.WriteLine($"Суммарная прибыль: {fullProfit}.");
+            Console.WriteLine("==============================");
+        }
         static void Main(string[] args)
         {
             //Добавляет заданное кол-во пеших курьеров.
@@ -69,36 +102,7 @@
                             OrderDestributor.Distributoin(orderT);
                         }
                     }
-                    TimeSpan summTime = TimeSpan.FromMinutes(0);
-                    int fullProfit = 0;
-                    Console.WriteLine("==============================");
-                    for (int i = 0; i < Company.quantityC; i++)
-                    {
-                        if (Company.Couriers[i].Orders.Count > 0)
-                        {
-                            Console.Write($"{Company.Couriers[i].Name} будет выполнять заказ(ы):");
-                            for (int j = 0; j < Company.Couriers[i].Orders.Count; j++)
-                            {
-                                summTime += Company.Couriers[i].Orders[j].Time;
-                                fullProfit += Company.Couriers[i].Orders[j].Profit;
-                                Console.Write($" {Company.Couriers[i].Orders[j].Id} ({Company.Couriers[i].Orders[j].Profit})");
-                            }
-                            Console.Write($" Суммарное время:{summTime}");
-                            summTime = TimeSpan.FromMinutes(0);
-                            Console.WriteLine(".");
-                        }
-                    }
-                    if (Company.RejectedOrders.Count > 0)
-                    {
-                        Console.Write($" Непринятые заказы:");
-                        for (int i = 0; i < Company.RejectedOrders.Count; i++)
-                        {
-                            Console.Write($" {Company.RejectedOrders[i].Id}");
-                        }
-                        Console.WriteLine(".");
-                    }
-                    Console.WriteLine($"Суммарная прибыль: {fullProfit}.");
-                    Console.WriteLine("==============================");
+                    GetInfo();
                 }
                 else if (command1 == "Закончить работу")
                 {

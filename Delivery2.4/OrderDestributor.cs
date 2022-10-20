@@ -40,17 +40,21 @@ namespace Delivery2._4
         {
             order = CourierCalculator.CalculateMaxProfit(order);
             //Ищет курьера, который примет заказ, если такой не находится, то закидывает заказ в список непринятых.
-            foreach (var courier in order.Couriers)
+            for (int i = 0; i < order.Couriers.Count; i++)
             {
-                order.Profit = courier.Profit;
-                if (courier.Profit <= 0)
+                order.Profit = order.Couriers[i].Profit;
+                if (order.Profit <= 0)
                 {
                     Company.RejectedOrders.Add(order);
                     break;
                 }
-                if (Company.Couriers[courier.Courier.CourierID].AttachingOrder(order, courier.NumberPriorityCoord, courier.Profit))
+                if (Company.Couriers[order.Couriers[i].Courier.CourierID].AttachingOrder(order, order.Couriers[i].NumberPriorityCoord, order.Couriers[i].Profit))
                 {
                     break;
+                }
+                if (i == order.Couriers.Count)
+                {
+                    Company.RejectedOrders.Add(order);
                 }
             }
         }

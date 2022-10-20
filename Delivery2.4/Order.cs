@@ -23,7 +23,7 @@ namespace Delivery2._4
         public List<CourierProfit> Couriers = new();
 
         public double Distance { get { return Start.GetDistance(End); } }
-        
+
         public int Coast { get { return GetOrderPrice(); } }
 
         public int Profit { get; set; }
@@ -33,7 +33,7 @@ namespace Delivery2._4
         /// <summary>
         /// Считает стоимость заказа.
         /// </summary>
-        protected int  GetOrderPrice()
+        protected int GetOrderPrice()
         {
             return (int)Math.Round(Distance * Company.PricePerDistance);
         }

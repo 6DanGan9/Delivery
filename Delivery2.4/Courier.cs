@@ -103,7 +103,15 @@ namespace Delivery2._4
             //Если заказ хочет прикрепиться в конец, то он прикрепляется.
             if (numberPriorityCoord == Orders.Count)
             {
-                order.Time = TimeCalculator.TimeToCompliteOrder(order, this);
+                if (numberPriorityCoord == 0)
+                {
+                    order.Time = TimeCalculator.TimeToCompliteOrder(order, this);
+                }
+                else
+                {
+                    order.Time = TimeCalculator.TimeToCompliteOrder(order, this, Orders[^1].End);
+                }
+                order.Couriers.Clear();
                 Orders.Add(order);
                 return true;
             }
@@ -122,12 +130,13 @@ namespace Delivery2._4
             //Заказу присваиваются его время на выполнение.
             if (numberPriorityCoord == 0)
             {
-                order.Time = TimeCalculator.TimeToCompliteOrder(order, this, Start);
+                order.Time = TimeCalculator.TimeToCompliteOrder(order, this);
             }
             else
             {
-            order.Time = TimeCalculator.TimeToCompliteOrder(order, this, Orders[^1].End);
+                order.Time = TimeCalculator.TimeToCompliteOrder(order, this, Orders[^1].End);
             }
+            order.Couriers.Clear();
             Orders.Add(order);
             return true;
         }
