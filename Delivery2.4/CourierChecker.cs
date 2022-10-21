@@ -11,36 +11,36 @@ namespace Delivery2._4
         /// <summary>
         /// Проверяет, может ли курьер взять заказ.
         /// </summary>
-        public static bool CheckCombination(OrderForTaking order, Courier courier)
+        public static bool CheckCombination(Order order, Courier courier)
         {
-            return (courier.Capacity >= order.Weigth)
-                && (courier.StartTime + TimeCalculator.TimeToWay(order, courier) < order.DeadLine)
-                && (courier.StartTime + TimeCalculator.TimeToCompliteOrder(order, courier) < courier.EndTime);
-        }
-        /// <summary>
-        /// Проверяет, может ли курьер взять заказ.
-        /// </summary>
-        public static bool CheckCombination(OrderForDelivery order, Courier courier)
-        {
-            return (courier.Capacity >= order.Weigth)
+            if (order is OrderForDelivery)
+            {
+                return (courier.Capacity >= order.Weigth)
                 && (courier.StartTime + TimeCalculator.TimeToCompliteOrder(order, courier) < order.DeadLine)
                 && (courier.StartTime + TimeCalculator.TimeToCompliteOrder(order, courier) < courier.EndTime);
+            }
+            else
+            {
+                return (courier.Capacity >= order.Weigth)
+                && (courier.StartTime + TimeCalculator.TimeToWay(order, courier) < order.DeadLine)
+                && (courier.StartTime + TimeCalculator.TimeToCompliteOrder(order, courier) < courier.EndTime);
+            }
         }
         /// <summary>
         /// Проверяет, может ли курьер взять заказ в конец списка.
         /// </summary>
-        public static bool CheckCombinationFromEnd(OrderForTaking order, Courier courier)
+        public static bool CheckCombinationFromEnd(Order order, Courier courier)
         {
-            return (courier.StartTime + courier.BusyTime + TimeCalculator.TimeToWay(order, courier) < order.DeadLine)
+            if (order is OrderForDelivery)
+            {
+                return (courier.StartTime + courier.BusyTime + TimeCalculator.TimeToCompliteOrder(order, courier) < order.DeadLine)
                 && (courier.StartTime + courier.BusyTime + TimeCalculator.TimeToCompliteOrder(order, courier) < courier.EndTime);
-        }
-        /// <summary>
-        /// Проверяет, может ли курьер взять заказ в конец списка.
-        /// </summary>
-        public static bool CheckCombinationFromEnd(OrderForDelivery order, Courier courier)
-        {
-            return (courier.StartTime + courier.BusyTime + TimeCalculator.TimeToCompliteOrder(order, courier) < order.DeadLine)
+            }
+            else
+            {
+                return (courier.StartTime + courier.BusyTime + TimeCalculator.TimeToWay(order, courier) < order.DeadLine)
                 && (courier.StartTime + courier.BusyTime + TimeCalculator.TimeToCompliteOrder(order, courier) < courier.EndTime);
+            }
         }
     }
 }

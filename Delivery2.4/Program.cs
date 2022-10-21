@@ -39,28 +39,28 @@
         {
             //Добавляет заданное кол-во пеших курьеров.
             Console.WriteLine("Введите количество пеших курьеров.");
-            int quantityFC = int.Parse(Console.ReadLine());
+            var quantityFC = int.Parse(Console.ReadLine());
             for (int i = 0; i < quantityFC; i++)
             {
                 Company.CouriersList.Add(new FootCourier(i));
             }
             //Добавляет заданное кол-во курьеров на велосипедах.
             Console.WriteLine("Введите количество курьеров на велосипедах.");
-            int quantityBC = int.Parse(Console.ReadLine());
+            var quantityBC = int.Parse(Console.ReadLine());
             for (int i = 0; i < quantityBC; i++)
             {
                 Company.CouriersList.Add(new BikeCourier(i));
             }
             //Добавляет заданное кол-во курьеров на скутерах.
             Console.WriteLine("Введите количество курьеров на скутерах.");
-            int quantitySC = int.Parse(Console.ReadLine());
+            var quantitySC = int.Parse(Console.ReadLine());
             for (int i = 0; i < quantitySC; i++)
             {
                 Company.CouriersList.Add(new ScuterCourier(i));
             }
             //Добавляет заданное кол-во курьеров на машинах.
             Console.WriteLine("Введите количество курьеров на машинах.");
-            int quantityCC = int.Parse(Console.ReadLine());
+            var quantityCC = int.Parse(Console.ReadLine());
             for (int i = 0; i < quantityCC; i++)
             {
                 Company.CouriersList.Add(new CarCourier(i));
@@ -79,13 +79,15 @@
                     string command2 = Console.ReadLine();
                     if (command2 == "Доставить")
                     {
-                        OrderForDelivery order = OrderForDelivery.NewOrder(orderNum);
+                        var orderD = OrderForDelivery.NewOrder(orderNum);
+                        var order = (Order) orderD;
                         OrderDestributor.Distributoin(order);
                         orderNum++;
                     }
                     else if (command2 == "Забрать")
                     {
-                        OrderForTaking order = OrderForTaking.NewOrder(orderNum);
+                        var orderT = OrderForTaking.NewOrder(orderNum);
+                        var order = (Order)orderT;
                         OrderDestributor.Distributoin(order);
                         orderNum++;
                     }
@@ -93,14 +95,7 @@
                     {
                         Order order1 = Company.FreeOrders[^1];
                         Company.FreeOrders.RemoveAt(Company.FreeOrders.Count - 1);
-                        if (order1 is OrderForDelivery orderD)
-                        {
-                            OrderDestributor.Distributoin(orderD);
-                        }
-                        if (order1 is OrderForTaking orderT)
-                        {
-                            OrderDestributor.Distributoin(orderT);
-                        }
+                        OrderDestributor.Distributoin(order1);
                     }
                     GetInfo();
                 }

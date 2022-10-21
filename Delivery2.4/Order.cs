@@ -20,7 +20,7 @@ namespace Delivery2._4
 
         public DateTime DeadLine { get; protected set; }
 
-        public List<CourierProfit> Couriers = new();
+        public List<Variant> Variants = new();
 
         public double Distance { get { return Start.GetDistance(End); } }
 

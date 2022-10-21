@@ -15,44 +15,24 @@ namespace Delivery2._4
         /// <summary>
         /// Распределяет заказ.
         /// </summary>
-        public static void Distributoin(OrderForDelivery order)
+        public static void Distributoin(Order order)
         {
-            order = CourierCalculator.CalculateMaxProfit(order);
+            order = CourierCalculator.CalculateVariants(order);
             //Ищет курьера, который примет заказ, если такой не находится, то закидывает заказ в список непринятых.
-            foreach (var courier in order.Couriers)
+            for (int i = 0; i < order.Variants.Count; i++)
             {
-                order.Profit = courier.Profit;
-                if (courier.Profit <= 0)
+                order.Profit = order.Variants[i].Profit;
+                if (order.Variants[i].Profit <= 0)
                 {
                     Company.RejectedOrders.Add(order);
                     break;
                 }
-                if (Company.Couriers[courier.Courier.CourierID].AttachingOrder(order, courier.NumberPriorityCoord, courier.Profit))
+                if (Company.Couriers[order.Variants[i].Courier.CourierID].CanAttachingOrder(order.Variants[i].NumberPriorityCoord, order.Variants[i].Profit))
                 {
+                    Company.Couriers[order.Variants[i].Courier.CourierID].AttachingOrder(order, order.Variants[i].NumberPriorityCoord);
                     break;
                 }
-            }
-        }
-        /// <summary>
-        /// Распределяет заказ.
-        /// </summary>
-        public static void Distributoin(OrderForTaking order)
-        {
-            order = CourierCalculator.CalculateMaxProfit(order);
-            //Ищет курьера, который примет заказ, если такой не находится, то закидывает заказ в список непринятых.
-            for (int i = 0; i < order.Couriers.Count; i++)
-            {
-                order.Profit = order.Couriers[i].Profit;
-                if (order.Profit <= 0)
-                {
-                    Company.RejectedOrders.Add(order);
-                    break;
-                }
-                if (Company.Couriers[order.Couriers[i].Courier.CourierID].AttachingOrder(order, order.Couriers[i].NumberPriorityCoord, order.Couriers[i].Profit))
-                {
-                    break;
-                }
-                if (i == order.Couriers.Count - 1)
+                if (i == order.Variants.Count - 1)
                 {
                     Company.RejectedOrders.Add(order);
                 }

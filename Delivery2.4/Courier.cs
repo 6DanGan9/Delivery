@@ -96,23 +96,13 @@ namespace Delivery2._4
             return dateTime;
         }
         /// <summary>
-        /// Прикрепляет заказ к курьеру, если это не возможно возвращает false.
+        /// Проверяет, принесёт ли взятие этого заказа больше прибыли.
         /// </summary>
-        public bool AttachingOrder(Order order, int numberPriorityCoord, int profit)
+        public bool CanAttachingOrder(int numberPriorityCoord, int profit)
         {
             //Если заказ хочет прикрепиться в конец, то он прикрепляется.
             if (numberPriorityCoord == Orders.Count)
             {
-                if (numberPriorityCoord == 0)
-                {
-                    order.Time = TimeCalculator.TimeToCompliteOrder(order, this);
-                }
-                else
-                {
-                    order.Time = TimeCalculator.TimeToCompliteOrder(order, this, Orders[^1].End);
-                }
-                order.Couriers.Clear();
-                Orders.Add(order);
                 return true;
             }
             //Если заказ менее выгоден, нежели заказ, вместо которого он хочет встать, то курьер от него отказывается(возвращается false).
@@ -120,6 +110,13 @@ namespace Delivery2._4
             {
                 return false;
             }
+            return true;
+        }
+        /// <summary>
+        /// Прикрепляет заказ к курьеру.
+        /// </summary>
+        public void AttachingOrder (Order order, int numberPriorityCoord)
+        {
             //Все заказы начиная с того, вместо которого хочет встать заказ, переходят в список свободных заказов, а заказ встаёт на их место.
             int quantityOrders = (Orders.Count - numberPriorityCoord);
             for (int i = 0; i < quantityOrders; i++)
@@ -136,9 +133,8 @@ namespace Delivery2._4
             {
                 order.Time = TimeCalculator.TimeToCompliteOrder(order, this, Orders[^1].End);
             }
-            order.Couriers.Clear();
+            order.Variants.Clear();
             Orders.Add(order);
-            return true;
         }
     }
 }

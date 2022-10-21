@@ -12,13 +12,13 @@ namespace Delivery2._4
     internal class OrderForTaking : Order
     {
         static Random rnd = new();
-        public OrderForTaking(int id, Coord start, Coord end, string deadline, double weigth)
+        private OrderForTaking(int id, Coord start, Coord end, string deadline, double weigth)
         {
             Id = id;
             Start = start;
             End = end;
             Weigth = weigth;
-            DeadLine = DateTime.Today + TimeSpan.FromMinutes(rnd.Next(600, 1439));
+            DeadLine = DateTime.Today + /*TimeCalculator.TimeToMinute(deadline)*/TimeSpan.FromMinutes(rnd.Next(600, 1439));
             Console.WriteLine(DeadLine);
         }
         public static OrderForTaking NewOrder(int OrderNumber)
@@ -31,9 +31,9 @@ namespace Delivery2._4
             Console.WriteLine($"{end.X}, {end.Y}");
             Console.WriteLine("Введите массу груза.");
             Console.WriteLine("3");
-            double weigth = 3;  //int.Parse(Console.ReadLine());
+            double weigth = 3; //int.Parse(Console.ReadLine());
             Console.WriteLine("Введите конечное время в формате 00:00.");
-            string time = "00:00";
+            string time = "00:00"; //Console.ReadLine();
             OrderForTaking order = new(OrderNumber, start, end, time, weigth);
             return order;
         }
