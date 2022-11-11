@@ -40,7 +40,7 @@ namespace Delivery2._4
         /// <summary>
         /// Считает профит для заказа от данной координаты, если его будет доставлять данный курьер.
         /// </summary>
-        public static int CalcutuateProfitOfOrder(this Courier courier, Order order,  Coord coord)
+        private static int CalcutuateProfitOfOrder(this Courier courier, Order order,  Coord coord)
         {
             return (int)Math.Round(order.Coast - (order.Distance + CoordHelper.GetDistance(order.Start, coord)) * courier.Price);
         }
