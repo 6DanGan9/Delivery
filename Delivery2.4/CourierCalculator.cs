@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Delivery2._4
 {
-    internal class CourierCalculator
+    internal static class CourierCalculator
     {
         /// <summary>
         /// Возвращает заказ с отсортированным по профитности списком возможных вариантов прикрепления к курьерам.
@@ -15,34 +15,32 @@ namespace Delivery2._4
         {
             for (int i = 0; i < Company.quantityC; i++)
             {
-                if (CourierChecker.CheckCombination(order, Company.Couriers[i]))
+                int quantityCoord = Company.Couriers[i].Orders.Count + 1;
+                for (int j = 0; j < quantityCoord; j++)
                 {
-                    //Добавляет варианты для начальной координаты курьера.
-                    order.Variants.Add( new Variant(Company.Couriers[i], ProfitOfOrder(order, Company.Couriers[i], Company.Couriers[i].Start), 0));
-                    if (Company.Couriers[i].Orders.Count > 0)
+                    if (Company.Couriers[i].CheckCombination(order, j))
                     {
-                        //Добавляет варианты для конца каждого из заказов данного курьера.
-                        for (int j = 1; j < Company.Couriers[i].Orders.Count - 1; j++)
+                        int profit;
+                        if (j == 0)
                         {
-                            order.Variants.Add(new Variant(Company.Couriers[i], ProfitOfOrder(order, Company.Couriers[i], Company.Couriers[i].Orders[j - 1].End), j));
+                            profit = Company.Couriers[i].CalcutuateProfitOfOrder(order, Company.Couriers[i].Start);
                         }
-                        //Проверяет, может ли быть взят заказ в хвост, если да, то добавляет вариант взятия в хвост.
-                        if (CourierChecker.CheckCombinationFromEnd(order, Company.Couriers[i]))
+                        else
                         {
-                            order.Variants.Add(new Variant (Company.Couriers[i], ProfitOfOrder(order, Company.Couriers[i], Company.Couriers[i].Orders[^1].End), Company.Couriers[i].Orders.Count));
+                            profit = Company.Couriers[i].CalcutuateProfitOfOrder(order, Company.Couriers[i].Orders[j - 1].End);
                         }
+                        Variant newVariant = new Variant(Company.Couriers[i], profit, j);
+                        order.Variants.Add(newVariant);
                     }
                 }
             }
-            //Сортирует все варианты.
-            order.Variants.Sort();
-            order.Variants.Reverse();
+            order.SortVariantsByProfit();
             return order;
         }
         /// <summary>
         /// Считает профит для заказа от данной координаты, если его будет доставлять данный курьер.
         /// </summary>
-        private static int ProfitOfOrder(Order order, Courier courier, Coord coord)
+        public static int CalcutuateProfitOfOrder(this Courier courier, Order order,  Coord coord)
         {
             return (int)Math.Round(order.Coast - (order.Distance + CoordHelper.GetDistance(order.Start, coord)) * courier.Price);
         }

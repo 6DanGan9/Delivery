@@ -27,7 +27,15 @@ namespace Delivery2._4
         /// </summary>
         public static TimeSpan TimeToWay(Order order, Courier courier)
         {
-            TimeSpan time = TimeSpan.FromMinutes((int)Math.Round(CoordHelper.GetDistance(order.Start, courier.Start) / courier.Speed * 60));
+            TimeSpan time = TimeSpan.FromMinutes((int)Math.Round(courier.Start.GetDistance(order.Start) / courier.Speed * 60));
+            return time;
+        }
+        /// <summary>
+        /// Считает, сколько времени курьер потратит на путь до начальной координаты заказа от заданной координаты.
+        /// </summary>
+        public static TimeSpan TimeToWay(Order order, Courier courier, Coord start)
+        {
+            TimeSpan time = TimeSpan.FromMinutes((int)Math.Round(start.GetDistance(order.Start) / courier.Speed * 60));
             return time;
         }
         /// <summary>
@@ -35,7 +43,7 @@ namespace Delivery2._4
         /// </summary>
         public static TimeSpan TimeToCompliteOrder(Order order, Courier courier)
         {
-            TimeSpan time = TimeSpan.FromMinutes((int)Math.Round((CoordHelper.GetDistance(order.Start, courier.Start) + order.Distance) / courier.Speed * 60));
+            TimeSpan time = TimeSpan.FromMinutes((int)Math.Round((courier.Start.GetDistance(order.Start) + order.Distance) / courier.Speed * 60));
             return time;
         }
         /// <summary>
@@ -43,7 +51,7 @@ namespace Delivery2._4
         /// </summary>
         public static TimeSpan TimeToCompliteOrder(Order order, Courier courier, Coord start)
         {
-            TimeSpan time = TimeSpan.FromMinutes((int)Math.Round((CoordHelper.GetDistance(order.Start, start) + order.Distance) / courier.Speed * 60));
+            TimeSpan time = TimeSpan.FromMinutes((int)Math.Round((start.GetDistance(order.Start) + order.Distance) / courier.Speed * 60));
             return time;
         }
     }

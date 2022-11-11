@@ -37,5 +37,12 @@ namespace Delivery2._4
         {
             return (int)Math.Round(Distance * Company.PricePerDistance);
         }
+        /// <summary>
+        /// Сортирует все варианты по профитности.
+        /// </summary>
+        public void SortVariantsByProfit()
+        {
+            Variants.OrderByDescending(x => x.Profit);
+        }
     }
 }

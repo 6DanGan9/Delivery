@@ -121,7 +121,7 @@ namespace Delivery2._4
             int quantityOrders = (Orders.Count - numberPriorityCoord);
             for (int i = 0; i < quantityOrders; i++)
             {
-                Company.FreeOrders.Add(Orders[^1]);
+                Company.FreeOrders.Enqueue(Orders[^1]);
                 Orders.RemoveAt(Orders.Count - 1);
             }
             //Заказу присваиваются его время на выполнение.

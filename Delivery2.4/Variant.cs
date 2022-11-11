@@ -9,18 +9,8 @@ namespace Delivery2._4
     /// <summary>
     /// Класс для хранения каждого возможного варианта вставки заказа.
     /// </summary>
-    internal class Variant : IComparable
+    internal class Variant
     {
-        //Метод сортировки.
-        public int CompareTo(object obj)
-        {
-            Variant variant = obj as Variant;
-            if (variant != null)
-                return Profit.CompareTo(variant.Profit);
-            else
-                throw new Exception("Не то...");
-        }
-
         public Variant(Courier courier, int profit, int numberPriorityCoord)
         {
             Courier = courier;

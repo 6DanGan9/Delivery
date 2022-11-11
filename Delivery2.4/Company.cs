@@ -29,7 +29,7 @@ namespace Delivery2._4
         public static List<Courier> CouriersList = new();
         public static int quantityC;
         public static Courier[] Couriers = new Courier[quantityC];
-        public static List<Order> FreeOrders = new();
+        public static Queue<Order> FreeOrders = new();
         public static List<Order> RejectedOrders = new();
     }
 }
