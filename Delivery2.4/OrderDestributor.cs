@@ -37,6 +37,7 @@ namespace Delivery2._4
                     Company.RejectedOrders.Add(order);
                 }
             }
+            order.Variants.Clear();
         }
     }
 }

@@ -13,7 +13,7 @@ namespace Delivery2._4
         /// </summary>
         public static Order CalculateVariants(Order order)
         {
-            for (int i = 0; i < Company.quantityC; i++)
+            for (int i = 0; i < Company.QuantityC; i++)
             {
                 int quantityCoord = Company.Couriers[i].Orders.Count + 1;
                 for (int j = 0; j < quantityCoord; j++)

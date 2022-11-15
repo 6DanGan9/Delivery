@@ -1,12 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.Metrics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace Delivery2._4
 {
-    internal class Company
+    internal static class Company
     {
         public const double PricePerDistance = 200;
         //Стандартные характеристики пешего курьера.
@@ -27,9 +28,157 @@ namespace Delivery2._4
         public const double DefaultCarCurierPricePerDistance = 80;
 
         public static List<Courier> CouriersList = new();
-        public static int quantityC;
-        public static Courier[] Couriers = new Courier[quantityC];
+        public static int QuantityC;
+        public static Courier[] Couriers = new Courier[QuantityC];
         public static Queue<Order> FreeOrders = new();
         public static List<Order> RejectedOrders = new();
+        public static List<Order> DelitedOrders = new();
+
+        private static int quantityFC;
+        private static int quantityBC;
+        private static int quantitySC;
+        private static int quantityCC;
+
+
+        public static void StartProgram()
+        {
+            CreateCouriersList();
+        }
+
+        private static void CreateCouriersList()
+        {
+            //Добавляет заданное кол-во пеших курьеров.
+            Console.WriteLine("Введите количество пеших курьеров.");
+            quantityFC = int.Parse(Console.ReadLine());
+            for (int i = 0; i < quantityFC; i++)
+            {
+                CouriersList.Add(new FootCourier(i));
+            }
+            //Добавляет заданное кол-во курьеров на велосипедах.
+            Console.WriteLine("Введите количество курьеров на велосипедах.");
+            quantityBC = int.Parse(Console.ReadLine());
+            for (int i = 0; i < quantityBC; i++)
+            {
+                CouriersList.Add(new BikeCourier(i));
+            }
+            //Добавляет заданное кол-во курьеров на скутерах.
+            Console.WriteLine("Введите количество курьеров на скутерах.");
+            quantitySC = int.Parse(Console.ReadLine());
+            for (int i = 0; i < quantitySC; i++)
+            {
+                CouriersList.Add(new ScuterCourier(i));
+            }
+            //Добавляет заданное кол-во курьеров на машинах.
+            Console.WriteLine("Введите количество курьеров на машинах.");
+            quantityCC = int.Parse(Console.ReadLine());
+            for (int i = 0; i < quantityCC; i++)
+            {
+                CouriersList.Add(new CarCourier(i));
+            }
+            //Считает общее кол-во курьеров и переделывает список в массив.
+            QuantityC = quantityFC + quantityBC + quantitySC + quantityCC;
+            Couriers = CouriersList.ToArray();
+        }
+
+        public static void DeliteCourier(int courierID)
+        {
+            Courier courier = Couriers[courierID];
+            courier.Delite();
+            CouriersList.Remove(courier);
+            QuantityC--;
+            Courier[] couriers = new Courier[QuantityC];
+            int j = 0;
+            for (int i = 0; i < QuantityC + 1; i++)
+            {
+                
+                if (Couriers[i] != courier)
+                {
+                    Couriers[i].ResetID(j);
+                    couriers[j] = Couriers[i];
+                    j++;
+                }
+            }
+            Couriers = new Courier[QuantityC];
+            Couriers = couriers;
+            DestributeFreeOrders();
+        }
+        public static void DestributeFreeOrders()
+        {
+            while (FreeOrders.Count > 0)
+            {
+                Order orderForRedestribute = FreeOrders.Dequeue();
+                OrderDestributor.Distributoin(orderForRedestribute);
+            }
+        }
+
+        public static void AddCourier()
+        {
+            Console.WriteLine("Укажите тип нового курьера: Пеший(1)/ На велосипеде(2)/ На скутере(3)/ На машине(4)");
+            CreateNewCourier(int.Parse(Console.ReadLine()));
+            ReDistributeAllOrders();
+        }
+
+        private static void ReDistributeAllOrders()
+        {
+            foreach(var courier in Couriers)
+            {
+                foreach(var order in courier.Orders)
+                    FreeOrders.Enqueue(order);
+                courier.Orders.Clear();
+            }
+            foreach(var order in RejectedOrders)
+                FreeOrders.Enqueue(order);
+            RejectedOrders.Clear();
+            DestributeFreeOrders();
+        }
+
+        private static void CreateNewCourier(int tip)
+        {
+            switch(tip)
+            {
+                case 1:
+                    AttahcingCourier(new FootCourier(quantityFC));
+                    quantityFC++;
+                    break;
+                case 2:
+                    AttahcingCourier(new BikeCourier(quantityBC));
+                    quantityBC++;
+                    break;
+                case 3:
+                    AttahcingCourier(new ScuterCourier(quantitySC));
+                    quantitySC++;
+                    break;
+                case 4:
+                    AttahcingCourier(new CarCourier(quantityCC));
+                    quantityCC++;
+                    break;
+            }
+        }
+
+        private static void AttahcingCourier(Courier courier)
+        {
+            CouriersList.Add(courier);
+            QuantityC++;
+            Courier[] couriers = new Courier[QuantityC];
+            for (int i = 0; i < QuantityC - 1; i++)
+                couriers[i] = Couriers[i];
+            couriers[QuantityC - 1] = courier;
+            Couriers = new Courier[QuantityC];
+            Couriers = couriers;
+        }
+
+        internal static void DeliteOrder(int id)
+        {
+            foreach(var courier in Couriers)
+            {
+                foreach(Order order in courier.Orders)
+                    if (order.Id == id)
+                    {
+                        courier.DelitOrder(id);
+                        break;
+                    }
+            }
+            DestributeFreeOrders();
+        }
     }
 }

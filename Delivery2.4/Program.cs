@@ -11,45 +11,15 @@ namespace Delivery2._4
     {
         static void Main(string[] args)
         {
-            //Добавляет заданное кол-во пеших курьеров.
-            Console.WriteLine("Введите количество пеших курьеров.");
-            var quantityFC = int.Parse(Console.ReadLine());
-            for (int i = 0; i < quantityFC; i++)
-            {
-                Company.CouriersList.Add(new FootCourier(i));
-            }
-            //Добавляет заданное кол-во курьеров на велосипедах.
-            Console.WriteLine("Введите количество курьеров на велосипедах.");
-            var quantityBC = int.Parse(Console.ReadLine());
-            for (int i = 0; i < quantityBC; i++)
-            {
-                Company.CouriersList.Add(new BikeCourier(i));
-            }
-            //Добавляет заданное кол-во курьеров на скутерах.
-            Console.WriteLine("Введите количество курьеров на скутерах.");
-            var quantitySC = int.Parse(Console.ReadLine());
-            for (int i = 0; i < quantitySC; i++)
-            {
-                Company.CouriersList.Add(new ScuterCourier(i));
-            }
-            //Добавляет заданное кол-во курьеров на машинах.
-            Console.WriteLine("Введите количество курьеров на машинах.");
-            var quantityCC = int.Parse(Console.ReadLine());
-            for (int i = 0; i < quantityCC; i++)
-            {
-                Company.CouriersList.Add(new CarCourier(i));
-            }
-            //Считает общее кол-во курьеров и переделывает список в массив.
-            Company.quantityC = quantityFC + quantityBC + quantitySC + quantityCC;
-            Company.Couriers = Company.CouriersList.ToArray();
+            Company.StartProgram();
             int orderNum = 1;
             while (orderNum >= 0)
             {
-                Console.WriteLine($"Введите действие: Добавить заказ/Закончить работу");
+                Console.WriteLine($"Введите действие: Добавить заказ(1)/Удалить Заказ(2)/Добавить курьера(3)/Удалить курьера(4)/Закончить работу(5)");
                 string command1 = Console.ReadLine();
-                if (command1 == "Добавить заказ")
+                if (command1 == "1")
                 {
-                    Console.WriteLine($"Введите тип заказа: Доставить/Забрать");
+                    Console.WriteLine($"Введите тип заказа: Доставить(1)/Забрать(2)");
                     string command2 = Console.ReadLine();
                     if (command2 == "1")
                     {
@@ -65,14 +35,30 @@ namespace Delivery2._4
                         OrderDestributor.Distributoin(order);
                         orderNum++;
                     }
-                    while (Company.FreeOrders.Count > 0)
-                    {
-                        Order orderForRedestribute = Company.FreeOrders.Dequeue();
-                        OrderDestributor.Distributoin(orderForRedestribute);
-                    }
+                    Company.DestributeFreeOrders();
                     GetInfo();
                 }
-                else if (command1 == "Закончить работу")
+                else if (command1 == "2")
+                {
+                    Console.WriteLine("Введите ID заказа, который хотите удалить");
+                    Company.DeliteOrder(int.Parse(Console.ReadLine()));
+                    GetInfo();
+                }
+                else if (command1 == "3")
+                {
+                    Company.AddCourier();
+                    GetInfo();
+                }
+                else if (command1 == "4")
+                {
+
+                    foreach (var cour in Company.Couriers)
+                        Console.WriteLine($"{cour.Name} ({cour.CourierID})");
+                    Console.WriteLine("Введите ID курьера");
+                    Company.DeliteCourier(int.Parse(Console.ReadLine()));
+                    GetInfo();
+                }
+                else if (command1 == "5")
                 {
                     break;
                 }
@@ -89,7 +75,7 @@ namespace Delivery2._4
         {
             int fullProfit = 0;
             Console.WriteLine("==============================");
-            for (int i = 0; i < Company.quantityC; i++)
+            for (int i = 0; i < Company.QuantityC; i++)
             {
                 if (Company.Couriers[i].Orders.Count > 0)
                 {
@@ -105,10 +91,19 @@ namespace Delivery2._4
             }
             if (Company.RejectedOrders.Count > 0)
             {
-                Console.Write($" Непринятые заказы:");
+                Console.Write($"Непринятые заказы:");
                 for (int i = 0; i < Company.RejectedOrders.Count; i++)
                 {
                     Console.Write($" {Company.RejectedOrders[i].Id}");
+                }
+                Console.WriteLine(".");
+            }
+            if (Company.DelitedOrders.Count > 0)
+            {
+                Console.Write($"Удалённые заказы:");
+                for (int i = 0; i < Company.DelitedOrders.Count; i++)
+                {
+                    Console.Write($" {Company.DelitedOrders[i].Id}");
                 }
                 Console.WriteLine(".");
             }

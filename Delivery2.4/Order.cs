@@ -42,7 +42,10 @@ namespace Delivery2._4
         /// </summary>
         public void SortVariantsByProfit()
         {
-            Variants.OrderByDescending(x => x.Profit);
+            var variants = Variants.OrderByDescending(x => x.Profit);
+            Variants = new();
+            foreach(var variant in variants)
+                Variants.Add(variant);
         }
     }
 }

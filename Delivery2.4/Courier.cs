@@ -136,5 +136,35 @@ namespace Delivery2._4
             order.Variants.Clear();
             Orders.Add(order);
         }
+
+        public void Delite()
+        {
+            foreach(var order in Orders)
+            {
+                Company.FreeOrders.Enqueue(order);
+            }
+        }
+
+        internal void ResetID(int j)
+        {
+            CourierID = j;
+        }
+
+        internal void DelitOrder(int id)
+        {
+            Order orderForDelit = null;
+            foreach(var order in Orders)
+                if (order.Id == id)
+                    orderForDelit = order;
+            int numberOrder = Orders.IndexOf(orderForDelit);
+            int quantityOrders = (Orders.Count - numberOrder);
+            for (int i = 1; i < quantityOrders; i++)
+            {
+                Company.FreeOrders.Enqueue(Orders[^1]);
+                Orders.RemoveAt(Orders.Count - 1);
+            }
+            Company.DelitedOrders.Add(Orders[numberOrder]);
+            Orders.RemoveAt(numberOrder);
+        }
     }
 }
