@@ -100,13 +100,14 @@ namespace Delivery2._4
         /// </summary>
         public bool CanAttachingOrder(int numberPriorityCoord, int profit)
         {
+            Company.quantityStep++;
             //Если заказ хочет прикрепиться в конец, то он прикрепляется.
             if (numberPriorityCoord == Orders.Count)
             {
                 return true;
             }
             //Если заказ менее выгоден, нежели заказ, вместо которого он хочет встать, то курьер от него отказывается(возвращается false).
-            if (profit <= Orders[numberPriorityCoord].Profit)
+            if (profit < Orders[numberPriorityCoord].Profit)
             {
                 return false;
             }
@@ -115,7 +116,7 @@ namespace Delivery2._4
         /// <summary>
         /// Прикрепляет заказ к курьеру.
         /// </summary>
-        public void AttachingOrder (Order order, int numberPriorityCoord)
+        public void AttachingOrder(Order order, int numberPriorityCoord)
         {
             //Все заказы начиная с того, вместо которого хочет встать заказ, переходят в список свободных заказов, а заказ встаёт на их место.
             int quantityOrders = (Orders.Count - numberPriorityCoord);
@@ -135,11 +136,12 @@ namespace Delivery2._4
             }
             order.Variants.Clear();
             Orders.Add(order);
+            Program.GetInfo();
         }
 
         public void Delite()
         {
-            foreach(var order in Orders)
+            foreach (var order in Orders)
             {
                 Company.FreeOrders.Enqueue(order);
             }
@@ -153,7 +155,7 @@ namespace Delivery2._4
         internal void DelitOrder(int id)
         {
             Order orderForDelit = null;
-            foreach(var order in Orders)
+            foreach (var order in Orders)
                 if (order.Id == id)
                     orderForDelit = order;
             int numberOrder = Orders.IndexOf(orderForDelit);
@@ -165,6 +167,29 @@ namespace Delivery2._4
             }
             Company.DelitedOrders.Add(Orders[numberOrder]);
             Orders.RemoveAt(numberOrder);
+        }
+
+        internal void DismissOrder(int id)
+        {
+            Order orderForDismiss = null;
+            foreach (var order in Orders)
+                if (order.Id == id)
+                    orderForDismiss = order;
+            if(orderForDismiss == null)
+                Console.WriteLine("-");
+            int numberOrder = Orders.IndexOf(orderForDismiss);
+            int quantityOrders = (Orders.Count - numberOrder);
+            if (quantityOrders > 1)
+            {
+                for (int i = 1; i < quantityOrders; i++)
+                {
+                    Company.FreeOrders.Enqueue(Orders[^1]);
+                    Orders.RemoveAt(Orders.Count - 1);
+                }
+                Orders.RemoveAt(Orders.Count - 1);
+            }
+            else
+                Orders.RemoveAt(Orders.Count - 1);
         }
     }
 }

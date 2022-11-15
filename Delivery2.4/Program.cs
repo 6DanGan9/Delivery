@@ -19,6 +19,7 @@ namespace Delivery2._4
                 string command1 = Console.ReadLine();
                 if (command1 == "1")
                 {
+                    Company.quantityStep = 0;
                     Console.WriteLine($"Введите тип заказа: Доставить(1)/Забрать(2)");
                     string command2 = Console.ReadLine();
                     if (command2 == "1")
@@ -36,26 +37,31 @@ namespace Delivery2._4
                         orderNum++;
                     }
                     Company.DestributeFreeOrders();
+                    Company.CheckAllOrderForRelevanceOfPosition();
                     GetInfo();
                 }
                 else if (command1 == "2")
                 {
+                    Company.quantityStep = 0;
                     Console.WriteLine("Введите ID заказа, который хотите удалить");
                     Company.DeliteOrder(int.Parse(Console.ReadLine()));
+                    Company.CheckAllOrderForRelevanceOfPosition();
                     GetInfo();
                 }
                 else if (command1 == "3")
                 {
+                    Company.quantityStep = 0;
                     Company.AddCourier();
                     GetInfo();
                 }
                 else if (command1 == "4")
                 {
-
+                    Company.quantityStep = 0;
                     foreach (var cour in Company.Couriers)
                         Console.WriteLine($"{cour.Name} ({cour.CourierID})");
                     Console.WriteLine("Введите ID курьера");
                     Company.DeliteCourier(int.Parse(Console.ReadLine()));
+                    Company.CheckAllOrderForRelevanceOfPosition();
                     GetInfo();
                 }
                 else if (command1 == "5")
@@ -71,9 +77,8 @@ namespace Delivery2._4
         /// <summary>
         /// Показывает текущую информацию о курьерах и заказах.
         /// </summary>
-        private static void GetInfo()
+        public static void GetInfo()
         {
-            int fullProfit = 0;
             Console.WriteLine("==============================");
             for (int i = 0; i < Company.QuantityC; i++)
             {
@@ -82,7 +87,6 @@ namespace Delivery2._4
                     Console.Write($"{Company.Couriers[i].Name} будет выполнять заказ(ы):");
                     for (int j = 0; j < Company.Couriers[i].Orders.Count; j++)
                     {
-                        fullProfit += Company.Couriers[i].Orders[j].Profit;
                         Console.Write($" {Company.Couriers[i].Orders[j].Id} ({Company.Couriers[i].Orders[j].Profit})");
                     }
                     Console.Write($" Суммарное время:{Company.Couriers[i].BusyTime}");
@@ -107,7 +111,9 @@ namespace Delivery2._4
                 }
                 Console.WriteLine(".");
             }
+            int fullProfit = Company.CalcFullProfit();
             Console.WriteLine($"Суммарная прибыль: {fullProfit}.");
+            Console.WriteLine($"Steps:{Company.quantityStep}");
             Console.WriteLine("==============================");
         }
     }

@@ -17,7 +17,7 @@ namespace Delivery2._4
         /// </summary>
         public static void Distributoin(Order order)
         {
-            order = CourierCalculator.CalculateVariants(order);
+            order.CalculateVariants();
             //Ищет курьера, который примет заказ, если такой не находится, то закидывает заказ в список непринятых.
             for (int i = 0; i < order.Variants.Count; i++)
             {
@@ -25,16 +25,19 @@ namespace Delivery2._4
                 if (order.Variants[i].Profit <= 0)
                 {
                     Company.RejectedOrders.Add(order);
+                    Company.Orders.Remove(order);
                     break;
                 }
                 if (Company.Couriers[order.Variants[i].Courier.CourierID].CanAttachingOrder(order.Variants[i].NumberPriorityCoord, order.Variants[i].Profit))
                 {
+                    order.SetActualeVariant(order.Variants[i]);
                     Company.Couriers[order.Variants[i].Courier.CourierID].AttachingOrder(order, order.Variants[i].NumberPriorityCoord);
                     break;
                 }
                 if (i == order.Variants.Count - 1)
                 {
                     Company.RejectedOrders.Add(order);
+                    Company.Orders.Remove(order);
                 }
             }
             order.Variants.Clear();

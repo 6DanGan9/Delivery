@@ -11,7 +11,7 @@ namespace Delivery2._4
         /// <summary>
         /// Возвращает заказ с отсортированным по профитности списком возможных вариантов прикрепления к курьерам.
         /// </summary>
-        public static Order CalculateVariants(Order order)
+        public static void CalculateVariants(this Order order)
         {
             for (int i = 0; i < Company.QuantityC; i++)
             {
@@ -35,7 +35,6 @@ namespace Delivery2._4
                 }
             }
             order.SortVariantsByProfit();
-            return order;
         }
         /// <summary>
         /// Считает профит для заказа от данной координаты, если его будет доставлять данный курьер.

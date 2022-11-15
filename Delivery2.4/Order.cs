@@ -22,6 +22,8 @@ namespace Delivery2._4
 
         public List<Variant> Variants = new();
 
+        private Variant ActualeVariant;
+
         public double Distance { get { return Start.GetDistance(End); } }
 
         public int Coast { get { return GetOrderPrice(); } }
@@ -44,8 +46,35 @@ namespace Delivery2._4
         {
             var variants = Variants.OrderByDescending(x => x.Profit);
             Variants = new();
-            foreach(var variant in variants)
+            foreach (var variant in variants)
                 Variants.Add(variant);
+        }
+        public void SetActualeVariant(Variant variant)
+        {
+            ActualeVariant = variant;
+        }
+        public bool CheckRelevanceOfPosition()
+        {
+            int i = 0;
+            this.CalculateVariants();
+            while (Variants[i].Profit > ActualeVariant.Profit)
+            {
+                if (!((Variants[i].Courier == ActualeVariant.Courier) && (Variants[i].NumberPriorityCoord >= ActualeVariant.NumberPriorityCoord)))
+                {
+                    if (Variants[i].Courier.CanAttachingOrder(Variants[i].NumberPriorityCoord, Variants[i].Profit))
+                    {
+                        ActualeVariant.Courier.DismissOrder(Id);
+                        ActualeVariant = Variants[i];
+                        Profit = ActualeVariant.Profit;
+                        Variants[i].Courier.AttachingOrder(this, Variants[i].NumberPriorityCoord);
+                        Company.DestributeFreeOrders();
+                        return true;
+                    }
+                }
+                i++;
+            }
+            Variants.Clear();
+            return false;
         }
     }
 }

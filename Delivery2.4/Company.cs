@@ -30,6 +30,7 @@ namespace Delivery2._4
         public static List<Courier> CouriersList = new();
         public static int QuantityC;
         public static Courier[] Couriers = new Courier[QuantityC];
+        public static List<Order> Orders = new();
         public static Queue<Order> FreeOrders = new();
         public static List<Order> RejectedOrders = new();
         public static List<Order> DelitedOrders = new();
@@ -39,6 +40,16 @@ namespace Delivery2._4
         private static int quantitySC;
         private static int quantityCC;
 
+        public static int quantityStep;
+
+        public static int CalcFullProfit()
+        {
+            int fullProfit = 0;
+            foreach(var courier in Couriers)
+                foreach(var order in courier.Orders)
+                    fullProfit += order.Profit;
+            return fullProfit;
+        }
 
         public static void StartProgram()
         {
@@ -101,6 +112,7 @@ namespace Delivery2._4
             Couriers = new Courier[QuantityC];
             Couriers = couriers;
             DestributeFreeOrders();
+            CheckAllOrderForRelevanceOfPosition();
         }
         public static void DestributeFreeOrders()
         {
@@ -116,6 +128,7 @@ namespace Delivery2._4
             Console.WriteLine("Укажите тип нового курьера: Пеший(1)/ На велосипеде(2)/ На скутере(3)/ На машине(4)");
             CreateNewCourier(int.Parse(Console.ReadLine()));
             ReDistributeAllOrders();
+            CheckAllOrderForRelevanceOfPosition();
         }
 
         private static void ReDistributeAllOrders()
@@ -174,11 +187,45 @@ namespace Delivery2._4
                 foreach(Order order in courier.Orders)
                     if (order.Id == id)
                     {
+                        Orders.Remove(order);
                         courier.DelitOrder(id);
                         break;
                     }
             }
             DestributeFreeOrders();
+            CheckAllOrderForRelevanceOfPosition();
+        }
+
+        public static void CheckAllOrderForRelevanceOfPosition()
+        {
+            List<int> exeptionCheckers = new();
+            int exeptionChecker = 0;
+            bool change = false;
+            while (change == false)
+            {
+                change = true;
+                foreach(var order in Orders)
+                {
+                    if (order.CheckRelevanceOfPosition())
+                    {
+                        change = false;
+                        exeptionChecker = CalcFullProfit();
+                        break;
+                    }
+                }
+                if (!exeptionCheckers.Contains(exeptionChecker))
+                    exeptionCheckers.Add(exeptionChecker);
+                else
+                {
+                    var maxProfit = exeptionCheckers.Max();
+                    var quantityNeededSteps = exeptionCheckers.IndexOf(maxProfit) - exeptionCheckers.IndexOf(exeptionChecker);
+                    for (int i = 0; i < quantityNeededSteps; i++)
+                        foreach (var order in Orders)
+                            if (order.CheckRelevanceOfPosition())
+                                break;
+                    change = true;
+                }
+            }
         }
     }
 }

@@ -35,6 +35,7 @@ namespace Delivery2._4
             Console.WriteLine("Введите конечное время в формате 00:00.");
             string time = "00:00"; //Console.ReadLine();
             OrderForDelivery order = new(OrderNumber, start, end, time, weigth);
+            Company.Orders.Add(order);
             return order;
         }
     }
