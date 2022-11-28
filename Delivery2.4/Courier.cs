@@ -107,7 +107,7 @@ namespace Delivery2._4
                 return true;
             }
             //Если заказ менее выгоден, нежели заказ, вместо которого он хочет встать, то курьер от него отказывается(возвращается false).
-            if (profit < Orders[numberPriorityCoord].Profit)
+            else if (profit <= Orders[numberPriorityCoord].Profit)
             {
                 return false;
             }
@@ -138,7 +138,9 @@ namespace Delivery2._4
             Orders.Add(order);
             Program.GetInfo();
         }
-
+        /// <summary>
+        /// Освобождает все заказы.
+        /// </summary>
         public void Delite()
         {
             foreach (var order in Orders)
@@ -146,12 +148,16 @@ namespace Delivery2._4
                 Company.FreeOrders.Enqueue(order);
             }
         }
-
+        /// <summary>
+        /// Смена ID курьера.
+        /// </summary>
         internal void ResetID(int j)
         {
             CourierID = j;
         }
-
+        /// <summary>
+        /// Удаляет заказ по его ID, если после этого заказа были запланированы ещё заказы, то их отправляет на перерасчёт.
+        /// </summary>
         internal void DelitOrder(int id)
         {
             Order orderForDelit = null;
@@ -168,7 +174,9 @@ namespace Delivery2._4
             Company.DelitedOrders.Add(Orders[numberOrder]);
             Orders.RemoveAt(numberOrder);
         }
-
+        /// <summary>
+        /// Отказывается от заказа по его ID, если после этого заказа были запланированы ещё заказы, то их отправляет на перерасчёт.
+        /// </summary>
         internal void DismissOrder(int id)
         {
             Order orderForDismiss = null;

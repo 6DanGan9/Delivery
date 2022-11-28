@@ -53,6 +53,9 @@ namespace Delivery2._4
         {
             ActualeVariant = variant;
         }
+        /// <summary>
+        /// Проверяет, является ли вариант нынешнего размещения наиболее выгодням, если нет, то пытается поменять на более выгодный вариант.
+        /// </summary>
         public bool CheckRelevanceOfPosition()
         {
             int i = 0;
@@ -64,6 +67,30 @@ namespace Delivery2._4
                     if (Variants[i].Courier.CanAttachingOrder(Variants[i].NumberPriorityCoord, Variants[i].Profit))
                     {
                         ActualeVariant.Courier.DismissOrder(Id);
+                        ActualeVariant = Variants[i];
+                        Profit = ActualeVariant.Profit;
+                        Variants[i].Courier.AttachingOrder(this, Variants[i].NumberPriorityCoord);
+                        Company.DestributeFreeOrders();
+                        return true;
+                    }
+                }
+                i++;
+            }
+            Variants.Clear();
+            return false;
+        }
+
+        internal bool TryRedistribute()
+        {
+            int i = 0;
+            this.CalculateVariants();
+            while (Variants[i].Profit > ActualeVariant.Profit)
+            {
+                if (!((Variants[i].Courier == ActualeVariant.Courier) && (Variants[i].NumberPriorityCoord >= ActualeVariant.NumberPriorityCoord)))
+                {
+                    if (Variants[i].Courier.CanAttachingOrder(Variants[i].NumberPriorityCoord, Variants[i].Profit))
+                    {
+                        Company.RejectedOrders.Remove(this);
                         ActualeVariant = Variants[i];
                         Profit = ActualeVariant.Profit;
                         Variants[i].Courier.AttachingOrder(this, Variants[i].NumberPriorityCoord);

@@ -9,7 +9,7 @@ namespace Delivery2._4
     internal static class CourierCalculator
     {
         /// <summary>
-        /// Возвращает заказ с отсортированным по профитности списком возможных вариантов прикрепления к курьерам.
+        /// Делает отсортированный список вариантов для добавления заказа.
         /// </summary>
         public static void CalculateVariants(this Order order)
         {

@@ -23,13 +23,5 @@ namespace Delivery2._4
         public int Profit { get; set; }
         //Координата, с который курьер должен будет начать, если возьмёт этот заказ.
         public int NumberPriorityCoord { get; set; }
-
-        public bool Similarity(Variant variant)
-        {
-            if ((Profit == variant.Profit) && (Courier == variant.Courier) && (NumberPriorityCoord == variant.NumberPriorityCoord))
-                return true;
-            else
-                return false;
-        }
     }
 }

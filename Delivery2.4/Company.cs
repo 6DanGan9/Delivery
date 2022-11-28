@@ -42,11 +42,13 @@ namespace Delivery2._4
 
         public static int quantityStep;
 
+        public static Variant NullVariant = new(null, 0, 0);
+
         public static int CalcFullProfit()
         {
             int fullProfit = 0;
-            foreach(var courier in Couriers)
-                foreach(var order in courier.Orders)
+            foreach (var courier in Couriers)
+                foreach (var order in courier.Orders)
                     fullProfit += order.Profit;
             return fullProfit;
         }
@@ -101,7 +103,7 @@ namespace Delivery2._4
             int j = 0;
             for (int i = 0; i < QuantityC + 1; i++)
             {
-                
+
                 if (Couriers[i] != courier)
                 {
                     Couriers[i].ResetID(j);
@@ -114,6 +116,9 @@ namespace Delivery2._4
             DestributeFreeOrders();
             CheckAllOrderForRelevanceOfPosition();
         }
+        /// <summary>
+        /// Распределяет все свободные заказы.
+        /// </summary>
         public static void DestributeFreeOrders()
         {
             while (FreeOrders.Count > 0)
@@ -122,7 +127,25 @@ namespace Delivery2._4
                 OrderDestributor.Distributoin(orderForRedestribute);
             }
         }
-
+        /// <summary>
+        /// Производит полный перерасчёт всех заказов.
+        /// </summary>
+        private static void ReDistributeAllOrders()
+        {
+            foreach (var courier in Couriers)
+            {
+                foreach (var order in courier.Orders)
+                    FreeOrders.Enqueue(order);
+                courier.Orders.Clear();
+            }
+            foreach (var order in RejectedOrders)
+                FreeOrders.Enqueue(order);
+            RejectedOrders.Clear();
+            DestributeFreeOrders();
+        }
+        /// <summary>
+        /// Добавляет нового курьера.
+        /// </summary>
         public static void AddCourier()
         {
             Console.WriteLine("Укажите тип нового курьера: Пеший(1)/ На велосипеде(2)/ На скутере(3)/ На машине(4)");
@@ -130,24 +153,12 @@ namespace Delivery2._4
             ReDistributeAllOrders();
             CheckAllOrderForRelevanceOfPosition();
         }
-
-        private static void ReDistributeAllOrders()
-        {
-            foreach(var courier in Couriers)
-            {
-                foreach(var order in courier.Orders)
-                    FreeOrders.Enqueue(order);
-                courier.Orders.Clear();
-            }
-            foreach(var order in RejectedOrders)
-                FreeOrders.Enqueue(order);
-            RejectedOrders.Clear();
-            DestributeFreeOrders();
-        }
-
+        /// <summary>
+        /// Создаёт нового курьера указанного типа.
+        /// </summary>
         private static void CreateNewCourier(int tip)
         {
-            switch(tip)
+            switch (tip)
             {
                 case 1:
                     AttahcingCourier(new FootCourier(quantityFC));
@@ -167,7 +178,9 @@ namespace Delivery2._4
                     break;
             }
         }
-
+        /// <summary>
+        /// Добалвяет нового курьера с массив курьеров.
+        /// </summary>
         private static void AttahcingCourier(Courier courier)
         {
             CouriersList.Add(courier);
@@ -179,12 +192,14 @@ namespace Delivery2._4
             Couriers = new Courier[QuantityC];
             Couriers = couriers;
         }
-
-        internal static void DeliteOrder(int id)
+        /// <summary>
+        /// Удаляет заказ по указанному ID.
+        /// </summary>
+        public static void DeliteOrder(int id)
         {
-            foreach(var courier in Couriers)
+            foreach (var courier in Couriers)
             {
-                foreach(Order order in courier.Orders)
+                foreach (Order order in courier.Orders)
                     if (order.Id == id)
                     {
                         Orders.Remove(order);
@@ -192,10 +207,10 @@ namespace Delivery2._4
                         break;
                     }
             }
-            DestributeFreeOrders();
-            CheckAllOrderForRelevanceOfPosition();
         }
-
+        /// <summary>
+        /// Производит проверку у всех заказов на актуальность их реализуемого варианта расположения.
+        /// </summary>
         public static void CheckAllOrderForRelevanceOfPosition()
         {
             List<int> exeptionCheckers = new();
@@ -204,7 +219,7 @@ namespace Delivery2._4
             while (change == false)
             {
                 change = true;
-                foreach(var order in Orders)
+                foreach (var order in Orders)
                 {
                     if (order.CheckRelevanceOfPosition())
                     {
@@ -213,6 +228,7 @@ namespace Delivery2._4
                         break;
                     }
                 }
+                //Провернка на попадание в бесконечный цикл.
                 if (!exeptionCheckers.Contains(exeptionChecker))
                     exeptionCheckers.Add(exeptionChecker);
                 else
@@ -225,6 +241,37 @@ namespace Delivery2._4
                                 break;
                     change = true;
                 }
+            }
+        }
+        /// <summary>
+        /// Производит попытку внести непринятые заказы.
+        /// </summary>
+        public static bool TryDistributeRejectedOrders()
+        {
+            bool change1 = false;
+            bool change2 = false;
+            while (change1 == false)
+            {
+                change1 = true;
+                foreach (var order in Orders)
+                {
+                    if (order.TryRedistribute())
+                    {
+                        change1 = false;
+                        change2 = true;
+                    }
+                    break;
+                }
+            }
+            return change2;
+        }
+        public static void EndCommand()
+        {
+            DestributeFreeOrders();
+            CheckAllOrderForRelevanceOfPosition();
+            while (TryDistributeRejectedOrders() != false)
+            {
+                CheckAllOrderForRelevanceOfPosition();
             }
         }
     }

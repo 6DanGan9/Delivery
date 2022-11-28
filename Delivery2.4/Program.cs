@@ -36,8 +36,7 @@ namespace Delivery2._4
                         OrderDestributor.Distributoin(order);
                         orderNum++;
                     }
-                    Company.DestributeFreeOrders();
-                    Company.CheckAllOrderForRelevanceOfPosition();
+                    Company.EndCommand();
                     GetInfo();
                 }
                 else if (command1 == "2")
@@ -45,13 +44,14 @@ namespace Delivery2._4
                     Company.quantityStep = 0;
                     Console.WriteLine("Введите ID заказа, который хотите удалить");
                     Company.DeliteOrder(int.Parse(Console.ReadLine()));
-                    Company.CheckAllOrderForRelevanceOfPosition();
+                    Company.EndCommand();
                     GetInfo();
                 }
                 else if (command1 == "3")
                 {
                     Company.quantityStep = 0;
                     Company.AddCourier();
+                    Company.EndCommand();
                     GetInfo();
                 }
                 else if (command1 == "4")
@@ -61,7 +61,7 @@ namespace Delivery2._4
                         Console.WriteLine($"{cour.Name} ({cour.CourierID})");
                     Console.WriteLine("Введите ID курьера");
                     Company.DeliteCourier(int.Parse(Console.ReadLine()));
-                    Company.CheckAllOrderForRelevanceOfPosition();
+                    Company.EndCommand();
                     GetInfo();
                 }
                 else if (command1 == "5")
@@ -96,9 +96,9 @@ namespace Delivery2._4
             if (Company.RejectedOrders.Count > 0)
             {
                 Console.Write($"Непринятые заказы:");
-                for (int i = 0; i < Company.RejectedOrders.Count; i++)
+                foreach (var order in Company.RejectedOrders)
                 {
-                    Console.Write($" {Company.RejectedOrders[i].Id}");
+                    Console.Write($" {order.Id}");
                 }
                 Console.WriteLine(".");
             }

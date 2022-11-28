@@ -24,6 +24,7 @@ namespace Delivery2._4
                 order.Profit = order.Variants[i].Profit;
                 if (order.Variants[i].Profit <= 0)
                 {
+                    order.SetActualeVariant(Company.NullVariant);
                     Company.RejectedOrders.Add(order);
                     Company.Orders.Remove(order);
                     break;
@@ -36,6 +37,7 @@ namespace Delivery2._4
                 }
                 if (i == order.Variants.Count - 1)
                 {
+                    order.SetActualeVariant(Company.NullVariant);
                     Company.RejectedOrders.Add(order);
                     Company.Orders.Remove(order);
                 }
