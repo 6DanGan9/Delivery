@@ -21,7 +21,7 @@ namespace Delivery.UE
 
         protected Variant ActualeVariant;
 
-        private Stack<Variant> CheckedVariants = new();
+        protected Stack<Variant> CheckedVariants = new();
 
         public double Distance { get { return Start.GetDistance(End); } }
 
@@ -106,6 +106,7 @@ namespace Delivery.UE
         {
             Console.WriteLine($"Заказ {Id} начинает смотреть свои {variants.Count} вариантов");
             List<int> profits = new();
+            Company.LoopChecker.Push(new List<List<int>>());
             foreach (var variant in variants)
             {
                 var altSchedule = new AltSchedule();
@@ -113,6 +114,7 @@ namespace Delivery.UE
                 profits.Add(altSchedule.CalcProfitAltSchedule(this, variant));
                 CheckedVariants.Pop();
             }
+            Company.LoopChecker.Pop();
             Console.WriteLine($"Заказ {Id} заканчивает смотреть свои {variants.Count} вариантов");
             return profits;
         }
@@ -120,9 +122,9 @@ namespace Delivery.UE
         public Order Copy()
         {
             if (this is OrderForDelivery)
-                return new OrderForDelivery(Id, Start, End, DeadLine, Weigth, Time, ActualeVariant);
+                return new OrderForDelivery(Id, Start, End, DeadLine, Weigth, Time, ActualeVariant, CheckedVariants);
             else
-                return new OrderForTaking(Id, Start, End, DeadLine, Weigth, Time, ActualeVariant);
+                return new OrderForTaking(Id, Start, End, DeadLine, Weigth, Time, ActualeVariant, CheckedVariants);
         }
 
         public void SetActualeVariant(Variant variant, TimeSpan time)

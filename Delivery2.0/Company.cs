@@ -93,6 +93,8 @@ namespace Delivery.UE
                 if (schedule.Is(sched))
                 {
                     InLoop = true;
+                    Console.WriteLine("aaaa");
+                    Console.ReadKey();
                     return;
                 }
             }

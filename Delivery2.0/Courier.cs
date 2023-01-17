@@ -126,7 +126,6 @@ namespace Delivery.UE
 
         private void NewOrderEventComeEventHandler(object? sender, OrderEventDescriptor e)
         {
-            Thread.Sleep(200);
             List<Coord> coords = new();
             List<Variant> variants = new();
             var order = e.Order;
@@ -168,8 +167,8 @@ namespace Delivery.UE
             else
                 time = TimeCalculator.TimeToCompliteOrder(order, this, Start);
             order.SetActualeVariant(variant, time);
+            Console.WriteLine($"Kyp {Name} добавляет заказ {order.Id} на {variant.NumberPriorityCoord} место");
             Orders.Add(order);
-
             if (quantityOrders != 0)
                 DismissFreeOrder.Invoke(this, new CourierEventDescriptor { Courier = this });
         }

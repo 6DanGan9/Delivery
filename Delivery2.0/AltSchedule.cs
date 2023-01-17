@@ -15,9 +15,7 @@ namespace Delivery.UE
         public int CalcProfitAltSchedule(Order order, Variant variant)
         {
             SaveOriginalSchedule();
-            Company.LoopChecker.Push(new List<List<int>>());
             variant.Courier.AttachingOrder(order, variant);
-            Company.LoopChecker.Pop();
             Company.GetInfo();
             int profit = Company.FullProfit();
             ResetSchedule();

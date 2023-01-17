@@ -13,7 +13,7 @@ namespace Delivery.UE
     {
         static Random rnd = new();
 
-        public OrderForDelivery(int id, Coord start, Coord end, DateTime deadline, double weigth, TimeSpan time, Variant actualeVariant)
+        public OrderForDelivery(int id, Coord start, Coord end, DateTime deadline, double weigth, TimeSpan time, Variant actualeVariant, Stack<Variant> checkedVariants)
         {
             Id = id;
             Start = start;
@@ -22,6 +22,7 @@ namespace Delivery.UE
             DeadLine = deadline;
             Time = time;
             ActualeVariant = actualeVariant;
+            CheckedVariants = checkedVariants;
         }
 
         private OrderForDelivery(int id, Coord start, Coord end, string deadline, double weigth)
