@@ -26,6 +26,9 @@ namespace Delivery.UE
         public const double DefaultCarCurierCapacity = 60;
         public const double DefaultCarCurierPricePerDistance = 80;
 
+        public static Stack<List<List<int>>> LoopChecker = new();
+        public static bool InLoop = false;
+
         public static List<Courier> CouriersList = new();
         public static int QuantityC;
         private static int quantityFC;
@@ -38,8 +41,6 @@ namespace Delivery.UE
         public static Queue<Order> FreeOrders = new();
         public static List<Order> RejectedOrders = new();
         public static List<Order> DelitedOrders = new();
-
-        public static bool InLoop = false;
 
         public static event EventHandler<OrderEventDescriptor> DeliteOrderEvent;
 
@@ -59,12 +60,55 @@ namespace Delivery.UE
             foreach (var order in FreeOrders)
                 Console.Write($"{order.Id} ");
             Console.WriteLine(".");
+            CheckLoop();
+            if (InLoop)
+            {
+                Console.WriteLine("Loop");
+                Console.ReadKey();
+            }
             while (FreeOrders.Count > 0)
             {
                 var order = FreeOrders.Dequeue();
                 Console.WriteLine($"Перераспределяется заказ №{order.Id}");
                 order.Redestribute();
             }
+        }
+
+        private static void CheckLoop()
+        {
+            var schedule = new List<int>();
+            schedule.Add(FullProfit());
+            foreach (var courier in Couriers)
+            {
+                schedule.Add(courier.CourierID);
+                foreach (var order in courier.Orders)
+                    schedule.Add(order.Id);
+            }
+            foreach (var order in RejectedOrders)
+                schedule.Add(order.Id);
+            foreach (var order in FreeOrders)
+                schedule.Add(order.Id);
+            foreach(var sched in LoopChecker.Peek())
+            {
+                if (schedule.Is(sched))
+                {
+                    InLoop = true;
+                }
+                else
+                {
+                    LoopChecker.Peek().Add(schedule);
+                }
+            }
+        }
+
+        private static bool Is(this List<int> ints1, List<int> ints2)
+        {
+            if (ints1.Count != ints2.Count)
+                return false;
+            for(int i = 0; i < ints1.Count; i++)  
+                if (ints1[i] != ints2[i])
+                    return false;
+            return true;
         }
 
         private static void CreateCouriersList()
@@ -104,6 +148,7 @@ namespace Delivery.UE
             {
                 courier.Intilize();
             }
+            LoopChecker.Push(new List<List<int>>());
         }
 
         private static void WaitCommand()

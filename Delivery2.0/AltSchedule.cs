@@ -9,13 +9,14 @@ namespace Delivery.UE
 {
     internal class AltSchedule
     {
-        private List<List<int>> SchedulesForCheking = new();
         private List<Order>[] OrigSchedule = new List<Order>[Company.QuantityC];
         private Queue<Order> OrigRejectedOrders = new();
         public int CalcProfitAltSchedule(Order order, Variant variant)
         {
             SaveOriginalSchedule();
+            Company.LoopChecker.Push(new List<List<int>>());
             variant.Courier.AttachingOrder(order, variant);
+            Company.LoopChecker.Pop();
             Company.GetInfo();
             int profit = Company.FullProfit();
             ResetSchedule();
