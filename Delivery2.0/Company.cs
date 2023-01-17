@@ -38,7 +38,7 @@ namespace Delivery.UE
         public static Courier[] Couriers = new Courier[QuantityC];
 
         public static List<Order> Orders = new();
-        public static Queue<Order> FreeOrders = new();
+        public static Stack<Order> FreeOrders = new();
         public static List<Order> RejectedOrders = new();
         public static List<Order> DelitedOrders = new();
 
@@ -68,7 +68,7 @@ namespace Delivery.UE
             }
             while (FreeOrders.Count > 0)
             {
-                var order = FreeOrders.Dequeue();
+                var order = FreeOrders.Pop();
                 Console.WriteLine($"Перераспределяется заказ №{order.Id}");
                 order.Redestribute();
             }
@@ -88,24 +88,22 @@ namespace Delivery.UE
                 schedule.Add(order.Id);
             foreach (var order in FreeOrders)
                 schedule.Add(order.Id);
-            foreach(var sched in LoopChecker.Peek())
+            foreach (var sched in LoopChecker.Peek())
             {
                 if (schedule.Is(sched))
                 {
                     InLoop = true;
-                }
-                else
-                {
-                    LoopChecker.Peek().Add(schedule);
+                    return;
                 }
             }
+            LoopChecker.Peek().Add(schedule);
         }
 
         private static bool Is(this List<int> ints1, List<int> ints2)
         {
             if (ints1.Count != ints2.Count)
                 return false;
-            for(int i = 0; i < ints1.Count; i++)  
+            for (int i = 0; i < ints1.Count; i++)
                 if (ints1[i] != ints2[i])
                     return false;
             return true;

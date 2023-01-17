@@ -159,7 +159,7 @@ namespace Delivery.UE
             int quantityOrders = (Orders.Count - variant.NumberPriorityCoord);
             for (int i = 0; i < quantityOrders; i++)
             {
-                Company.FreeOrders.Enqueue(Orders[^1]);
+                Company.FreeOrders.Push(Orders[^1]);
                 Orders.RemoveAt(Orders.Count - 1);
             }
             TimeSpan time;

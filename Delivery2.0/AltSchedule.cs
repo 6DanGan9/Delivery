@@ -11,6 +11,7 @@ namespace Delivery.UE
     {
         private List<Order>[] OrigSchedule = new List<Order>[Company.QuantityC];
         private Queue<Order> OrigRejectedOrders = new();
+        private Queue<Order> OrigFreeOrders = new();
         public int CalcProfitAltSchedule(Order order, Variant variant)
         {
             SaveOriginalSchedule();
@@ -35,6 +36,8 @@ namespace Delivery.UE
             }
             foreach (var ord in Company.RejectedOrders)
                 OrigRejectedOrders.Enqueue(ord);
+            foreach (var ord in Company.FreeOrders)
+                OrigFreeOrders.Enqueue(ord);
         }
 
         private void ResetSchedule()
@@ -50,6 +53,9 @@ namespace Delivery.UE
             Company.RejectedOrders.Clear();
             while (OrigRejectedOrders.Count > 0)
                 Company.RejectedOrders.Add(OrigRejectedOrders.Dequeue());
+            Company.FreeOrders.Clear();
+            while (OrigFreeOrders.Count > 0)
+                Company.FreeOrders.Push(OrigFreeOrders.Dequeue());
         }
     }
 }
