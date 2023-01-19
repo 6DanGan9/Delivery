@@ -62,8 +62,16 @@ namespace Delivery.UE
             foreach (var order in FreeOrders)
                 Console.Write($"{order.Id} ");
             Console.WriteLine(".");
-            //Проверяет попадание в цикл.
-            CheckLoop();
+            if (!InLoop)
+            {
+                //Проверяет попадание в цикл.
+                CheckLoop();
+            }
+            if (InLoop)
+            {
+                Console.WriteLine("aaaaaaa");
+                Console.ReadKey();
+            }
             while (FreeOrders.Count > 0)
             {
                 var order = FreeOrders.Pop();
@@ -102,7 +110,9 @@ namespace Delivery.UE
             }
             LoopChecker.Peek().Add(schedule);
         }
-
+        /// <summary>
+        /// Сравнение на равенство двух списков чисел.
+        /// </summary>
         private static bool Is(this List<int> ints1, List<int> ints2)
         {
             if (ints1.Count != ints2.Count)
@@ -112,7 +122,9 @@ namespace Delivery.UE
                     return false;
             return true;
         }
-
+        /// <summary>
+        /// Начальная настройка программы.
+        /// </summary>
         private static void CreateCouriersList()
         {
             //Добавляет заданное кол-во пеших курьеров.
@@ -152,7 +164,9 @@ namespace Delivery.UE
             }
             LoopChecker.Push(new List<List<int>>());
         }
-
+        /// <summary>
+        /// Работа программы.
+        /// </summary>
         private static void WaitCommand()
         {
             int orderNum = 1;
@@ -255,7 +269,6 @@ namespace Delivery.UE
         /// <summary>
         /// Считает суммарную прибыль расписания.
         /// </summary>
-        /// <returns></returns>
         public static int FullProfit()
         {
             int profit = 0;

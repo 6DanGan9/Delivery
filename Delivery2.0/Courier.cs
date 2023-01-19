@@ -28,6 +28,8 @@ namespace Delivery.UE
 
         public List<Order> Orders = new();
 
+        private List<int> LockedVariants = new();
+
         public TimeSpan BusyTime { get { return CalculateBusyTime(); } }
 
         public event EventHandler<CourierEventDescriptor> DismissFreeOrder;
@@ -151,11 +153,18 @@ namespace Delivery.UE
                     variants.Add(variant);
                 }
             }
-            //Удаление вариантов с отрицательным профитом.
+            //Удаление вариантов с отрицательным профитом и вариантов, которые заблокированы.
             if (variants != null)
                 foreach (var variant in variants.ToList())
+                {
                     if (variant.Profit < 0)
+                    {
                         variants.Remove(variant);
+                        continue;
+                    }
+                    if (LockedVariants.Count > 0 && variant.NumberPriorityCoord <= LockedVariants.Max())
+                        variants.Remove(variant);
+                }
             //Передача вариантов заказу.
             order.TakeVariants(variants);
         }
@@ -187,11 +196,34 @@ namespace Delivery.UE
             if (quantityOrders != 0)
                 DismissFreeOrder.Invoke(this, new CourierEventDescriptor { Courier = this });
         }
-        //Изначальная инициальзация курьера.
+        /// <summary>
+        /// Изначальная инициальзация курьера.
+        /// </summary>
         public void Intilize()
         {
             Order.NewOrderEvent += NewOrderEventComeEventHandler;
             DismissFreeOrder += Company.DestributeFreeOrders;
+        }
+        /// <summary>
+        /// Блокирует варианты.
+        /// </summary>
+        public void LockVariant(Variant variant)
+        {
+            LockedVariants.Add(variant.NumberPriorityCoord);
+        }
+        /// <summary>
+        /// Снимает блокировку варианта.
+        /// </summary>
+        public void UnlockVariant(Variant variant)
+        {
+            LockedVariants.Remove(variant.NumberPriorityCoord);
+        }
+        /// <summary>
+        /// Отчищает заблокированные варианты.
+        /// </summary>
+        public void UnlockAllVariants()
+        {
+            LockedVariants.Clear();
         }
     }
 }

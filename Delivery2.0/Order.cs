@@ -21,8 +21,6 @@ namespace Delivery.UE
 
         protected Variant ActualeVariant;
 
-        protected Stack<Variant> CheckedVariants = new();
-
         public double Distance { get { return Start.GetDistance(End); } }
 
         public int Coast { get { return GetOrderPrice(); } }
@@ -71,7 +69,6 @@ namespace Delivery.UE
             var variants = CollectingVariants();
             //Удаление последнего варианта расстановки, и варианта, который проверяет заказ в данный момент.
             RemoveActualeVariants(variants);
-            RemoveCheckedVariants(variants);
             //Проверка, есть ли у заказа какие-то варианты, если нету, то заказ переходит в список непринятых.
             if (variants.Count == 0)
             {
@@ -82,21 +79,6 @@ namespace Delivery.UE
             var profits = CalcProfitOfVariants(variants);
             //Применение варианта с наибольн=шим профитом для расписания.
             UseVariant(variants[profits.IndexOf(profits.Max())]);
-        }
-        /// <summary>
-        /// Удаление вариантов, которые в данный момент рассматривает заказ.
-        /// </summary>
-        private void RemoveCheckedVariants(List<Variant> variants)
-        {
-            foreach (var checkedVariant in CheckedVariants)
-            {
-                foreach (var variant in variants)
-                    if (checkedVariant.Is(variant))
-                    {
-                        variants.Remove(variant);
-                        break;
-                    }
-            }
         }
         /// <summary>
         /// Удаление варианта, на котором заказ стоял до перераспределения.
@@ -123,11 +105,7 @@ namespace Delivery.UE
             foreach (var variant in variants)
             {
                 var altSchedule = new AltSchedule();
-                //Добавляем вариант, который в данный момент проверяем.
-                CheckedVariants.Push(variant);
                 profits.Add(altSchedule.CalcProfitAltSchedule(this, variant));
-                //Снимаем проверяемый вариант.
-                CheckedVariants.Pop();
             }
             //Снимаем уровень проверки на бесконецный цикл.
             Company.LoopChecker.Pop();
@@ -140,9 +118,9 @@ namespace Delivery.UE
         public Order Copy()
         {
             if (this is OrderForDelivery)
-                return new OrderForDelivery(Id, Start, End, DeadLine, Weigth, Time, ActualeVariant, CheckedVariants);
+                return new OrderForDelivery(Id, Start, End, DeadLine, Weigth, Time, ActualeVariant);
             else
-                return new OrderForTaking(Id, Start, End, DeadLine, Weigth, Time, ActualeVariant, CheckedVariants);
+                return new OrderForTaking(Id, Start, End, DeadLine, Weigth, Time, ActualeVariant);
         }
         /// <summary>
         /// Установка нового актуального варианта.
@@ -169,8 +147,9 @@ namespace Delivery.UE
         /// </summary>
         public void UseVariant(Variant variant)
         {
-            variant.Courier.AttachingOrder(this, variant); 
-
+            variant.Courier.LockVariant(variant);
+            variant.Courier.AttachingOrder(this, variant);
+            variant.Courier.UnlockVariant(variant);
         }
     }
 }
