@@ -26,7 +26,9 @@ namespace Delivery.UE
             var coord = new Coord(rnd.Next(1, 16), rnd.Next(1, 16));
             return coord;
         }
-
+        /// <summary>
+        /// Подсчёт суммарной дистанции выполнения заказа.
+        /// </summary>
         public static double GetAllDistance(this Coord coord, Order order)
         {
             return Math.Sqrt(

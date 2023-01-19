@@ -34,6 +34,9 @@ namespace Delivery.UE
             DeadLine = DateTime.Today + /*TimeCalculator.TimeToMinute(deadline)*/TimeSpan.FromMinutes(rnd.Next(600, 1439));
             Console.WriteLine(DeadLine);
         }
+        /// <summary>
+        /// Создание нового заказа.
+        /// </summary>
         public static OrderForDelivery NewOrder(int OrderNumber)
         {
             Console.WriteLine("Введите координаты начала через запятую(x, y).");

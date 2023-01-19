@@ -27,7 +27,7 @@ namespace Delivery.UE
 
         public int Coast { get { return GetOrderPrice(); } }
 
-        public int Profit { get { return ActualeVariant != null ? ActualeVariant.Profit : 0 ; } }
+        public int Profit { get { return ActualeVariant != null ? ActualeVariant.Profit : 0; } }
 
         public TimeSpan Time { get; set; }
 
@@ -40,45 +40,53 @@ namespace Delivery.UE
         {
             return (int)Math.Round(Distance * Company.PricePerDistance);
         }
-
+        /// <summary>
+        /// Получение вариантов возможнох позиций в расписании.
+        /// </summary>
+        /// <param name="variants"></param>
         public void TakeVariants(IList<Variant> variants)
         {
             foreach (var variant in variants)
                 Variants.Enqueue(variant);
         }
-
+        /// <summary>
+        /// Распределение нового заказа.
+        /// </summary>
         internal void Destribute()
         {
-            NewOrderEvent.Invoke(this, new OrderEventDescriptor { Order = this });
-            var variants = new List<Variant>();
-            while (Variants.Count > 0)
-                variants.Add(Variants.Dequeue());
+            var variants = CollectingVariants();
+            //Проверка, есть ли у заказа какие-то варианты, если нету, то заказ переходит в список непринятых.
             if (variants.Count == 0)
             {
                 Company.RejectedOrders.Add(this);
                 return;
             }
+            //Подсчёт профитов расписаний при каждом из возможных вариантов расстановки.
             var profits = CalcProfitOfVariants(variants);
-            variants[profits.IndexOf(profits.Max())].Courier.AttachingOrder(this, variants[profits.IndexOf(profits.Max())]);
+            //Применение варианта с наибольн=шим профитом для расписания.
+            UseVariant(variants[profits.IndexOf(profits.Max())]);
         }
         internal void Redestribute()
         {
-            NewOrderEvent.Invoke(this, new OrderEventDescriptor { Order = this });
-            var variants = new List<Variant>();
-            while (Variants.Count > 0)
-                variants.Add(Variants.Dequeue());
-            variants = RemoveActualeVariants(variants);
-            variants = RemoveCheckedVariants(variants);
+            var variants = CollectingVariants();
+            //Удаление последнего варианта расстановки, и варианта, который проверяет заказ в данный момент.
+            RemoveActualeVariants(variants);
+            RemoveCheckedVariants(variants);
+            //Проверка, есть ли у заказа какие-то варианты, если нету, то заказ переходит в список непринятых.
             if (variants.Count == 0)
             {
                 Company.RejectedOrders.Add(this);
                 return;
             }
+            //Подсчёт профитов расписаний при каждом из возможных вариантов расстановки.
             var profits = CalcProfitOfVariants(variants);
-            variants[profits.IndexOf(profits.Max())].Courier.AttachingOrder(this, variants[profits.IndexOf(profits.Max())]);
+            //Применение варианта с наибольн=шим профитом для расписания.
+            UseVariant(variants[profits.IndexOf(profits.Max())]);
         }
-
-        private List<Variant> RemoveCheckedVariants(List<Variant> variants)
+        /// <summary>
+        /// Удаление вариантов, которые в данный момент рассматривает заказ.
+        /// </summary>
+        private void RemoveCheckedVariants(List<Variant> variants)
         {
             foreach (var checkedVariant in CheckedVariants)
             {
@@ -89,10 +97,11 @@ namespace Delivery.UE
                         break;
                     }
             }
-            return variants;
         }
-
-        private List<Variant> RemoveActualeVariants(List<Variant> variants)
+        /// <summary>
+        /// Удаление варианта, на котором заказ стоял до перераспределения.
+        /// </summary>
+        private void RemoveActualeVariants(List<Variant> variants)
         {
             foreach (var variant in variants)
                 if (ActualeVariant.Is(variant))
@@ -100,25 +109,34 @@ namespace Delivery.UE
                     variants.Remove(variant);
                     break;
                 }
-            return variants;
         }
+        /// <summary>
+        /// Считает профит расписания, при выборе каждого из вариантов, и возвращает списов крофитов, соответствующих вариантов.
+        /// </summary>
         private List<int> CalcProfitOfVariants(List<Variant> variants)
         {
             Console.WriteLine($"Заказ {Id} начинает смотреть свои {variants.Count} вариантов");
             List<int> profits = new();
+            //Ставим следующий уровень проверкина бесконецныый цикл. 
             Company.LoopChecker.Push(new List<List<int>>());
+            //Считаем профит каждого варианта.
             foreach (var variant in variants)
             {
                 var altSchedule = new AltSchedule();
+                //Добавляем вариант, который в данный момент проверяем.
                 CheckedVariants.Push(variant);
                 profits.Add(altSchedule.CalcProfitAltSchedule(this, variant));
+                //Снимаем проверяемый вариант.
                 CheckedVariants.Pop();
             }
+            //Снимаем уровень проверки на бесконецный цикл.
             Company.LoopChecker.Pop();
             Console.WriteLine($"Заказ {Id} заканчивает смотреть свои {variants.Count} вариантов");
             return profits;
         }
-
+        /// <summary>
+        /// Сооздание копии заказа.
+        /// </summary>
         public Order Copy()
         {
             if (this is OrderForDelivery)
@@ -126,11 +144,33 @@ namespace Delivery.UE
             else
                 return new OrderForTaking(Id, Start, End, DeadLine, Weigth, Time, ActualeVariant, CheckedVariants);
         }
-
+        /// <summary>
+        /// Установка нового актуального варианта.
+        /// </summary>
         public void SetActualeVariant(Variant variant, TimeSpan time)
         {
             ActualeVariant = variant;
             Time = time;
+        }
+        /// <summary>
+        /// Создание списка вариантов подстановки.
+        /// </summary>
+        /// <returns></returns>
+        private List<Variant> CollectingVariants()
+        {
+            NewOrderEvent.Invoke(this, new OrderEventDescriptor { Order = this });
+            var variants = new List<Variant>();
+            while (Variants.Count > 0)
+                variants.Add(Variants.Dequeue());
+            return variants;
+        }
+        /// <summary>
+        /// Исполнение варианта.
+        /// </summary>
+        public void UseVariant(Variant variant)
+        {
+            variant.Courier.AttachingOrder(this, variant); 
+
         }
     }
 }

@@ -97,9 +97,12 @@ namespace Delivery.UE
             }
             return dateTime;
         }
-
+        /// <summary>
+        /// Проверяет, может ли курьер выполнить данный заказ.
+        /// </summary>
         private bool CanCarry(Order order, int numberOfCheckedCoord)
         {
+            //Проверяется грузоподъёмность.
             if (Capacity < order.Weigth)
                 return false;
             Coord coordForCheck;
@@ -108,10 +111,12 @@ namespace Delivery.UE
                 coordForCheck = Start;
             else
                 coordForCheck = Orders[numberOfCheckedCoord - 1].End;
+            //Считается время, которое курьер потрадтит на заказы, до этого варианта подстановки.
             for (int i = 0; i < numberOfCheckedCoord; i++)
             {
                 busyTime += Orders[i].Time;
             }
+            //Считает, успеет ли курьер выполнить заказ до конца рабочего дня, и уложиться в ограничение по времени самого заказа.
             if (StartTime + busyTime + TimeCalculator.TimeToCompliteOrder(order, this, coordForCheck) > EndTime)
                 return false;
             if (order is OrderForDelivery)
@@ -123,18 +128,20 @@ namespace Delivery.UE
                 return (StartTime + busyTime + TimeCalculator.TimeToWay(order, this, coordForCheck) < order.DeadLine);
             }
         }
-
+        /// <summary>
+        /// Обработка заказа, и передача ему возможных вариантов подстановки.
+        /// </summary>
         private void NewOrderEventComeEventHandler(object? sender, OrderEventDescriptor e)
         {
             List<Coord> coords = new();
             List<Variant> variants = new();
             var order = e.Order;
+            //Сбор координат, с которых курьер может начать выполнение заказа.
             coords.Add(Start);
             foreach (var ord in Orders)
                 coords.Add(ord.End);
-
             Console.WriteLine($"Курьер {Name}: Получил событие появления Заказа: {order.Id}");
-
+            //Сбор списка вариантов, которые курьер может предложить заказу.
             for (int i = 0; i <= Orders.Count; i++)
             {
                 if (CanCarry(order, i))
@@ -144,10 +151,12 @@ namespace Delivery.UE
                     variants.Add(variant);
                 }
             }
+            //Удаление вариантов с отрицательным профитом.
             if (variants != null)
                 foreach (var variant in variants.ToList())
                     if (variant.Profit < 0)
                         variants.Remove(variant);
+            //Передача вариантов заказу.
             order.TakeVariants(variants);
         }
         /// <summary>
@@ -155,24 +164,30 @@ namespace Delivery.UE
         /// </summary>
         public void AttachingOrder(Order order, Variant variant)
         {
+            //Подсчёт количества заказов, которые нужно направить на перераспределение.
             int quantityOrders = (Orders.Count - variant.NumberPriorityCoord);
+            //Передача заказорв на перераспределение.
             for (int i = 0; i < quantityOrders; i++)
             {
                 Company.FreeOrders.Push(Orders[^1]);
                 Orders.RemoveAt(Orders.Count - 1);
             }
+            //Подсчём времени на выполнение заказа.
             TimeSpan time;
             if (variant.NumberPriorityCoord != 0)
                 time = TimeCalculator.TimeToCompliteOrder(order, this, Orders[^1].End);
             else
                 time = TimeCalculator.TimeToCompliteOrder(order, this, Start);
+            //Установка нового актуального варианта заказа.
             order.SetActualeVariant(variant, time);
             Console.WriteLine($"Kyp {Name} добавляет заказ {order.Id} на {variant.NumberPriorityCoord} место");
+            //Добавление заказа в список выполняемых.
             Orders.Add(order);
+            //Сообщение о том, что какие-то заказ были направлены на перераспределение.
             if (quantityOrders != 0)
                 DismissFreeOrder.Invoke(this, new CourierEventDescriptor { Courier = this });
         }
-
+        //Изначальная инициальзация курьера.
         public void Intilize()
         {
             Order.NewOrderEvent += NewOrderEventComeEventHandler;

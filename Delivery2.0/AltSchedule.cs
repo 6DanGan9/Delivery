@@ -12,16 +12,26 @@ namespace Delivery.UE
         private List<Order>[] OrigSchedule = new List<Order>[Company.QuantityC];
         private Queue<Order> OrigRejectedOrders = new();
         private Queue<Order> OrigFreeOrders = new();
+        /// <summary>
+        /// Считает профит расписания, если заказ исполюзует данный вариант.
+        /// </summary>
         public int CalcProfitAltSchedule(Order order, Variant variant)
         {
+            //Сохраняем расписание
             SaveOriginalSchedule();
-            variant.Courier.AttachingOrder(order, variant);
+            //Исполняем выбранный вариант.
+            order.UseVariant(variant);
+            //Выводим информацию.
             Company.GetInfo();
+            //Считаем профит полученного расписания.
             int profit = Company.FullProfit();
+            //Восстанавливаем расписание.
             ResetSchedule();
             return profit;
         }
-
+        /// <summary>
+        /// Сохраняет изначальное расписание.
+        /// </summary>
         private void SaveOriginalSchedule()
         {
             for(int i = 0; i < Company.Couriers.Length; i++)
@@ -37,7 +47,9 @@ namespace Delivery.UE
             foreach (var ord in Company.FreeOrders)
                 OrigFreeOrders.Enqueue(ord);
         }
-
+        /// <summary>
+        /// Востанавливает расписание в изначальный вид.
+        /// </summary>
         private void ResetSchedule()
         {
             for (int i = 0; i < OrigSchedule.Length; i++)

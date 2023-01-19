@@ -23,7 +23,9 @@ namespace Delivery.UE
         public int Profit { get; set; }
         //Номер координаты, с который курьер должен будет начать, если возьмёт этот заказ.
         public int NumberPriorityCoord { get; set; }
-
+        /// <summary>
+        /// Проверка, являются ли 2 варианта одинаковыми.
+        /// </summary>
         public bool Is(Variant variant)
         {
             if (Courier == variant.Courier && NumberPriorityCoord == variant.NumberPriorityCoord && Profit == variant.Profit)
