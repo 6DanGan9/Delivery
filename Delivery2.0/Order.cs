@@ -147,9 +147,7 @@ namespace Delivery.UE
         /// </summary>
         public void UseVariant(Variant variant)
         {
-            variant.Courier.LockVariant(variant);
             variant.Courier.AttachingOrder(this, variant);
-            variant.Courier.UnlockVariant(variant);
         }
     }
 }

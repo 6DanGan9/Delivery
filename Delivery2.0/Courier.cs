@@ -173,6 +173,7 @@ namespace Delivery.UE
         /// </summary>
         public void AttachingOrder(Order order, Variant variant)
         {
+            LockVariant(variant);
             //Подсчёт количества заказов, которые нужно направить на перераспределение.
             int quantityOrders = (Orders.Count - variant.NumberPriorityCoord);
             //Передача заказорв на перераспределение.
@@ -195,6 +196,7 @@ namespace Delivery.UE
             //Сообщение о том, что какие-то заказ были направлены на перераспределение.
             if (quantityOrders != 0)
                 DismissFreeOrder.Invoke(this, new CourierEventDescriptor { Courier = this });
+            UnlockVariant(variant);
         }
         /// <summary>
         /// Изначальная инициальзация курьера.
@@ -207,23 +209,16 @@ namespace Delivery.UE
         /// <summary>
         /// Блокирует варианты.
         /// </summary>
-        public void LockVariant(Variant variant)
+        private void LockVariant(Variant variant)
         {
             LockedVariants.Add(variant.NumberPriorityCoord);
         }
         /// <summary>
         /// Снимает блокировку варианта.
         /// </summary>
-        public void UnlockVariant(Variant variant)
+        private void UnlockVariant(Variant variant)
         {
             LockedVariants.Remove(variant.NumberPriorityCoord);
-        }
-        /// <summary>
-        /// Отчищает заблокированные варианты.
-        /// </summary>
-        public void UnlockAllVariants()
-        {
-            LockedVariants.Clear();
         }
     }
 }
