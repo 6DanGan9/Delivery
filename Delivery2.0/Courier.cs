@@ -28,9 +28,9 @@ namespace Delivery.UE
 
         public List<Order> Orders = new();
 
-        private List<int> LockedVariants = new();
-
         public TimeSpan BusyTime { get { return CalculateBusyTime(); } }
+
+        private List<int> LockedVariants = new();
 
         public event EventHandler<CourierEventDescriptor> DismissFreeOrder;
 
@@ -100,6 +100,44 @@ namespace Delivery.UE
             return dateTime;
         }
         /// <summary>
+        /// Все заказы начиная с того, вместо которого хочет встать заказ, переходят в список свободных заказов, а заказ встаёт на их место.
+        /// </summary>
+        public void AttachingOrder(Order order, Variant variant)
+        {
+            LockVariant(variant);
+            //Подсчёт количества заказов, которые нужно направить на перераспределение.
+            int quantityOrders = (Orders.Count - variant.NumberPriorityCoord);
+            //Передача заказорв на перераспределение.
+            for (int i = 0; i < quantityOrders; i++)
+            {
+                Company.FreeOrders.Push(Orders.Last());
+                Orders.RemoveAt(Orders.Count - 1);
+            }
+            //Подсчём времени на выполнение заказа.
+            TimeSpan time;
+            if (variant.NumberPriorityCoord != 0)
+                time = TimeCalculator.TimeToCompliteOrder(order, this, Orders.Last().End);
+            else
+                time = TimeCalculator.TimeToCompliteOrder(order, this, Start);
+            //Установка нового актуального варианта заказа.
+            order.SetActualeVariant(variant, time);
+            Console.WriteLine($"Kyp {Name} добавляет заказ {order.Id} на {variant.NumberPriorityCoord} место");
+            //Добавление заказа в список выполняемых.
+            Orders.Add(order);
+            //Сообщение о том, что какие-то заказ были направлены на перераспределение.
+            if (quantityOrders != 0)
+                DismissFreeOrder.Invoke(this, new CourierEventDescriptor { Courier = this });
+            UnlockVariant(variant);
+        }
+        /// <summary>
+        /// Изначальная инициальзация курьера.
+        /// </summary>
+        public void Intilize()
+        {
+            Order.NewOrderEvent += NewOrderEventComeEventHandler;
+            DismissFreeOrder += Company.DestributeFreeOrders;
+        }
+        /// <summary>
         /// Проверяет, может ли курьер выполнить данный заказ.
         /// </summary>
         private bool CanCarry(Order order, int numberOfCheckedCoord)
@@ -139,12 +177,22 @@ namespace Delivery.UE
             List<Variant> variants = new();
             var order = e.Order;
             //Сбор координат, с которых курьер может начать выполнение заказа.
-            coords.Add(Start);
-            foreach (var ord in Orders)
-                coords.Add(ord.End);
-            Console.WriteLine($"Курьер {Name}: Получил событие появления Заказа: {order.Id}");
+            if (Company.CheckSearchDepth())
+            {
+                coords.Add(Start);
+                foreach (var ord in Orders)
+                    coords.Add(ord.End);
+            }
+            else
+            {
+                if (Orders.Count > 0)
+                    coords.Add(Orders.Last().End);
+                else
+                    coords.Add(Start);
+            }
+            Console.WriteLine($"{Name}: Получил событие появления Заказа: {order.Id}");
             //Сбор списка вариантов, которые курьер может предложить заказу.
-            for (int i = 0; i <= Orders.Count; i++)
+            for (int i = 0; i < coords.Count; i++)
             {
                 if (CanCarry(order, i))
                 {
@@ -167,44 +215,6 @@ namespace Delivery.UE
                 }
             //Передача вариантов заказу.
             order.TakeVariants(variants);
-        }
-        /// <summary>
-        /// Все заказы начиная с того, вместо которого хочет встать заказ, переходят в список свободных заказов, а заказ встаёт на их место.
-        /// </summary>
-        public void AttachingOrder(Order order, Variant variant)
-        {
-            LockVariant(variant);
-            //Подсчёт количества заказов, которые нужно направить на перераспределение.
-            int quantityOrders = (Orders.Count - variant.NumberPriorityCoord);
-            //Передача заказорв на перераспределение.
-            for (int i = 0; i < quantityOrders; i++)
-            {
-                Company.FreeOrders.Push(Orders[^1]);
-                Orders.RemoveAt(Orders.Count - 1);
-            }
-            //Подсчём времени на выполнение заказа.
-            TimeSpan time;
-            if (variant.NumberPriorityCoord != 0)
-                time = TimeCalculator.TimeToCompliteOrder(order, this, Orders[^1].End);
-            else
-                time = TimeCalculator.TimeToCompliteOrder(order, this, Start);
-            //Установка нового актуального варианта заказа.
-            order.SetActualeVariant(variant, time);
-            Console.WriteLine($"Kyp {Name} добавляет заказ {order.Id} на {variant.NumberPriorityCoord} место");
-            //Добавление заказа в список выполняемых.
-            Orders.Add(order);
-            //Сообщение о том, что какие-то заказ были направлены на перераспределение.
-            if (quantityOrders != 0)
-                DismissFreeOrder.Invoke(this, new CourierEventDescriptor { Courier = this });
-            UnlockVariant(variant);
-        }
-        /// <summary>
-        /// Изначальная инициальзация курьера.
-        /// </summary>
-        public void Intilize()
-        {
-            Order.NewOrderEvent += NewOrderEventComeEventHandler;
-            DismissFreeOrder += Company.DestributeFreeOrders;
         }
         /// <summary>
         /// Блокирует варианты.

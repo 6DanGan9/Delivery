@@ -17,16 +17,16 @@ namespace Delivery.UE
         /// </summary>
         public int CalcProfitAltSchedule(Order order, Variant variant)
         {
+            Company.SearchDepthUp();
             //Сохраняем расписание
             SaveOriginalSchedule();
             //Исполняем выбранный вариант.
             order.UseVariant(variant);
-            //Выводим информацию.
-            Company.GetInfo();
             //Считаем профит полученного расписания.
             int profit = Company.FullProfit();
             //Восстанавливаем расписание.
             ResetSchedule();
+            Company.SearchDepthDown();
             return profit;
         }
         /// <summary>

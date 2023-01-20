@@ -17,10 +17,6 @@ namespace Delivery.UE
 
         public DateTime DeadLine { get; protected set; }
 
-        private Queue<Variant> Variants = new();
-
-        protected Variant ActualeVariant;
-
         public double Distance { get { return Start.GetDistance(End); } }
 
         public int Coast { get { return GetOrderPrice(); } }
@@ -28,6 +24,10 @@ namespace Delivery.UE
         public int Profit { get { return ActualeVariant != null ? ActualeVariant.Profit : 0; } }
 
         public TimeSpan Time { get; set; }
+
+        private Queue<Variant> Variants = new();
+
+        protected Variant ActualeVariant;
 
         public static event EventHandler<OrderEventDescriptor> NewOrderEvent;
 
@@ -41,7 +41,6 @@ namespace Delivery.UE
         /// <summary>
         /// Получение вариантов возможнох позиций в расписании.
         /// </summary>
-        /// <param name="variants"></param>
         public void TakeVariants(IList<Variant> variants)
         {
             foreach (var variant in variants)
@@ -50,7 +49,7 @@ namespace Delivery.UE
         /// <summary>
         /// Распределение нового заказа.
         /// </summary>
-        internal void Destribute()
+        public void Destribute()
         {
             var variants = CollectingVariants();
             //Проверка, есть ли у заказа какие-то варианты, если нету, то заказ переходит в список непринятых.
@@ -64,7 +63,7 @@ namespace Delivery.UE
             //Применение варианта с наибольн=шим профитом для расписания.
             UseVariant(variants[profits.IndexOf(profits.Max())]);
         }
-        internal void Redestribute()
+        public void Redestribute()
         {
             var variants = CollectingVariants();
             //Удаление последнего варианта расстановки, и варианта, который проверяет заказ в данный момент.
@@ -75,10 +74,43 @@ namespace Delivery.UE
                 Company.RejectedOrders.Add(this);
                 return;
             }
+            if(Company.CheckSearchDepth())
+            {
             //Подсчёт профитов расписаний при каждом из возможных вариантов расстановки.
             var profits = CalcProfitOfVariants(variants);
             //Применение варианта с наибольн=шим профитом для расписания.
             UseVariant(variants[profits.IndexOf(profits.Max())]);
+            }
+            else
+            {
+                var variantss = variants.OrderByDescending(x => x.Profit);
+                UseVariant(variantss.First());
+            }
+        }
+        /// <summary>
+        /// Установка нового актуального варианта.
+        /// </summary>
+        public void SetActualeVariant(Variant variant, TimeSpan time)
+        {
+            ActualeVariant = variant;
+            Time = time;
+        }
+        /// <summary>
+        /// Исполнение варианта.
+        /// </summary>
+        public void UseVariant(Variant variant)
+        {
+            variant.Courier.AttachingOrder(this, variant);
+        }
+        /// <summary>
+        /// Сооздание копии заказа.
+        /// </summary>
+        public Order Copy()
+        {
+            if (this is OrderForDelivery)
+                return new OrderForDelivery(Id, Start, End, DeadLine, Weigth, Time, ActualeVariant);
+            else
+                return new OrderForTaking(Id, Start, End, DeadLine, Weigth, Time, ActualeVariant);
         }
         /// <summary>
         /// Удаление варианта, на котором заказ стоял до перераспределения.
@@ -109,24 +141,6 @@ namespace Delivery.UE
             return profits;
         }
         /// <summary>
-        /// Сооздание копии заказа.
-        /// </summary>
-        public Order Copy()
-        {
-            if (this is OrderForDelivery)
-                return new OrderForDelivery(Id, Start, End, DeadLine, Weigth, Time, ActualeVariant);
-            else
-                return new OrderForTaking(Id, Start, End, DeadLine, Weigth, Time, ActualeVariant);
-        }
-        /// <summary>
-        /// Установка нового актуального варианта.
-        /// </summary>
-        public void SetActualeVariant(Variant variant, TimeSpan time)
-        {
-            ActualeVariant = variant;
-            Time = time;
-        }
-        /// <summary>
         /// Создание списка вариантов подстановки.
         /// </summary>
         /// <returns></returns>
@@ -137,13 +151,6 @@ namespace Delivery.UE
             while (Variants.Count > 0)
                 variants.Add(Variants.Dequeue());
             return variants;
-        }
-        /// <summary>
-        /// Исполнение варианта.
-        /// </summary>
-        public void UseVariant(Variant variant)
-        {
-            variant.Courier.AttachingOrder(this, variant);
         }
     }
 }

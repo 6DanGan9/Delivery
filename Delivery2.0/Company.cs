@@ -27,20 +27,20 @@ namespace Delivery.UE
         public const double DefaultCarCurierPricePerDistance = 80;
         //Информация о курьерах.
         public static List<Courier> CouriersList = new();
+        public static Courier[] Couriers = new Courier[QuantityC];
         public static int QuantityC;
         private static int quantityFC;
         private static int quantityBC;
         private static int quantitySC;
         private static int quantityCC;
-        public static Courier[] Couriers = new Courier[QuantityC];
         //Информация о заказах.
         public static List<Order> Orders = new();
         public static Stack<Order> FreeOrders = new();
         public static List<Order> RejectedOrders = new();
         public static List<Order> DelitedOrders = new();
         //Глубина просчёта альтернативных расписаний.
-        public static int MaxSearchDepth;
-        public static int ActualeSearchDepth; 
+        private static int MaxSearchDepth;
+        private static int ActualeSearchDepth;
         
         public static event EventHandler<OrderEventDescriptor> DeliteOrderEvent;
 
@@ -70,16 +70,39 @@ namespace Delivery.UE
             }
         }
         /// <summary>
-        /// Сравнение на равенство двух списков чисел.
+        /// Считает суммарную прибыль расписания.
         /// </summary>
-        private static bool Is(this List<int> ints1, List<int> ints2)
+        public static int FullProfit()
         {
-            if (ints1.Count != ints2.Count)
+            int profit = 0;
+            foreach (var courier in Couriers)
+                foreach (var order in courier.Orders)
+                    profit += order.Profit;
+            return profit;
+        }
+        /// <summary>
+        /// Проверяет, удовлетворяет ли глубина рассчёта расписания ограничению.
+        /// </summary>
+        public static bool CheckSearchDepth()
+        {
+            if (ActualeSearchDepth <= MaxSearchDepth)
+                return true;
+            else
                 return false;
-            for (int i = 0; i < ints1.Count; i++)
-                if (ints1[i] != ints2[i])
-                    return false;
-            return true;
+        }
+        /// <summary>
+        /// Переход на следующий уровень просчёта вариантов.
+        /// </summary>
+        public static void SearchDepthUp()
+        {
+            ActualeSearchDepth++;
+        }
+        /// <summary>
+        /// Выход с уровня подсчёта вариантов.
+        /// </summary>
+        public static void SearchDepthDown()
+        {
+            ActualeSearchDepth--;
         }
         /// <summary>
         /// Начальная настройка программы.
@@ -128,12 +151,14 @@ namespace Delivery.UE
         private static void WaitCommand()
         {
             int orderNum = 1;
-            while (orderNum >= 0)
+            SetSearchDepth();
+            while (orderNum > 0)
             {
-                Console.WriteLine($"Введите действие: Добавить заказ(1)/Удалить Заказ(2)/Добавить курьера(3)/Удалить курьера(4)/Закончить работу(5)");
+                Console.WriteLine($"Введите действие: Добавить заказ(1)/Удалить Заказ(2)/Добавить курьера(3)/Удалить курьера(4)/Изменить глубину поиска(5)/Закончить работу(6)");
                 string command1 = Console.ReadLine();
-                if (command1 == "1")
+                switch (command1)
                 {
+                    case "1":
                     Console.WriteLine($"Введите тип заказа: Доставить(1)/Забрать(2)");
                     string command2 = Console.ReadLine();
                     if (command2 == "1")
@@ -152,33 +177,32 @@ namespace Delivery.UE
                         orderNum++;
                     }
                     GetInfo();
-                }
-                else if (command1 == "2")
-                {
-                    //Console.WriteLine("Введите ID заказа, который хотите удалить");
-                    //Company.DeliteOrder(int.Parse(Console.ReadLine()));
-                    //GetInfo();
-                }
-                else if (command1 == "3")
-                {
-                    //Company.AddCourier();
-                    //GetInfo();
-                }
-                else if (command1 == "4")
-                {
-                    //foreach (var cour in Company.Couriers)
-                    //    Console.WriteLine($"{cour.Name} ({cour.CourierID})");
-                    //Console.WriteLine("Введите ID курьера");
-                    //Company.DeliteCourier(int.Parse(Console.ReadLine()));
-                    //GetInfo();
-                }
-                else if (command1 == "5")
-                {
-                    break;
-                }
-                else
-                {
-                    Console.WriteLine("Введите действие заново.");
+                        break;
+                    case "2":
+                        //Console.WriteLine("Введите ID заказа, который хотите удалить");
+                        //Company.DeliteOrder(int.Parse(Console.ReadLine()));
+                        //GetInfo();
+                        break;
+                    case "3":
+                        //Company.AddCourier();
+                        //GetInfo();
+                        break;
+                    case "4":
+                        //foreach (var cour in Company.Couriers)
+                        //    Console.WriteLine($"{cour.Name} ({cour.CourierID})");
+                        //Console.WriteLine("Введите ID курьера");
+                        //Company.DeliteCourier(int.Parse(Console.ReadLine()));
+                        //GetInfo();
+                        break;
+                    case "5":
+                        SetSearchDepth();
+                        break;
+                    case "6":
+                        orderNum = 0;
+                        break;
+                    default:
+                        Console.WriteLine("Введите действие заново.");
+                        break;
                 }
             }
         }
@@ -186,7 +210,7 @@ namespace Delivery.UE
         /// <summary>
         /// Показывает текущую информацию о курьерах и заказах.
         /// </summary>
-        public static void GetInfo()
+        private static void GetInfo()
         {
             Console.WriteLine("==============================");
             for (int i = 0; i < QuantityC; i++)
@@ -225,21 +249,12 @@ namespace Delivery.UE
             Console.WriteLine("==============================");
         }
         /// <summary>
-        /// Считает суммарную прибыль расписания.
+        /// Установка максимальной глубины рассчёта альтернативных расписаний.
         /// </summary>
-        public static int FullProfit()
-        {
-            int profit = 0;
-            foreach (var courier in Couriers)
-                foreach (var order in courier.Orders)
-                    profit += order.Profit;
-            return profit;
-        }
-        
         private static void SetSearchDepth()
         {
             Console.WriteLine("Введите глубину поиска");
-
+            MaxSearchDepth = int.Parse(Console.ReadLine());
         }
     }
 }
