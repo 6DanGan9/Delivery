@@ -99,16 +99,12 @@ namespace Delivery.UE
         {
             Console.WriteLine($"Заказ {Id} начинает смотреть свои {variants.Count} вариантов");
             List<int> profits = new();
-            //Ставим следующий уровень проверкина бесконецныый цикл. 
-            Company.LoopChecker.Push(new List<List<int>>());
             //Считаем профит каждого варианта.
             foreach (var variant in variants)
             {
                 var altSchedule = new AltSchedule();
                 profits.Add(altSchedule.CalcProfitAltSchedule(this, variant));
             }
-            //Снимаем уровень проверки на бесконецный цикл.
-            Company.LoopChecker.Pop();
             Console.WriteLine($"Заказ {Id} заканчивает смотреть свои {variants.Count} вариантов");
             return profits;
         }

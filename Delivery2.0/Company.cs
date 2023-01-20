@@ -25,9 +25,6 @@ namespace Delivery.UE
         public const double DefaultCarCurierSpeed = 25;
         public const double DefaultCarCurierCapacity = 60;
         public const double DefaultCarCurierPricePerDistance = 80;
-        //Поля для проверки на бесконечный цикл.
-        public static Stack<List<List<int>>> LoopChecker = new();
-        public static bool InLoop = false;
         //Информация о курьерах.
         public static List<Courier> CouriersList = new();
         public static int QuantityC;
@@ -41,7 +38,10 @@ namespace Delivery.UE
         public static Stack<Order> FreeOrders = new();
         public static List<Order> RejectedOrders = new();
         public static List<Order> DelitedOrders = new();
-
+        //Глубина просчёта альтернативных расписаний.
+        public static int MaxSearchDepth;
+        public static int ActualeSearchDepth; 
+        
         public static event EventHandler<OrderEventDescriptor> DeliteOrderEvent;
 
         public static event EventHandler<CourierEventDescriptor> NewCourierEvent;
@@ -62,53 +62,12 @@ namespace Delivery.UE
             foreach (var order in FreeOrders)
                 Console.Write($"{order.Id} ");
             Console.WriteLine(".");
-            if (!InLoop)
-            {
-                //Проверяет попадание в цикл.
-                CheckLoop();
-            }
-            if (InLoop)
-            {
-                Console.WriteLine("aaaaaaa");
-                Console.ReadKey();
-            }
             while (FreeOrders.Count > 0)
             {
                 var order = FreeOrders.Pop();
                 Console.WriteLine($"Перераспределяется заказ №{order.Id}");
                 order.Redestribute();
             }
-        }
-        /// <summary>
-        /// Проверка на попадание в бесконечный цикл.
-        /// </summary>
-        private static void CheckLoop()
-        {
-            //Создание упрощённого представления расписания.
-            var schedule = new List<int>();
-            schedule.Add(FullProfit());
-            foreach (var courier in Couriers)
-            {
-                schedule.Add(courier.CourierID);
-                foreach (var order in courier.Orders)
-                    schedule.Add(order.Id);
-            }
-            foreach (var order in RejectedOrders)
-                schedule.Add(order.Id);
-            foreach (var order in FreeOrders)
-                schedule.Add(order.Id);
-            //Поиск совпадения расписаний.
-            foreach (var sched in LoopChecker.Peek())
-            {
-                if (schedule.Is(sched))
-                {
-                    InLoop = true;
-                    Console.WriteLine("aaaa");
-                    Console.ReadKey();
-                    return;
-                }
-            }
-            LoopChecker.Peek().Add(schedule);
         }
         /// <summary>
         /// Сравнение на равенство двух списков чисел.
@@ -162,7 +121,6 @@ namespace Delivery.UE
             {
                 courier.Intilize();
             }
-            LoopChecker.Push(new List<List<int>>());
         }
         /// <summary>
         /// Работа программы.
@@ -276,6 +234,12 @@ namespace Delivery.UE
                 foreach (var order in courier.Orders)
                     profit += order.Profit;
             return profit;
+        }
+        
+        private static void SetSearchDepth()
+        {
+            Console.WriteLine("Введите глубину поиска");
+
         }
     }
 }
