@@ -43,9 +43,9 @@ namespace Delivery.UE
                 }
             }
             foreach (var ord in Company.RejectedOrders)
-                OrigRejectedOrders.Enqueue(ord);
+                OrigRejectedOrders.Enqueue(ord.Copy());
             foreach (var ord in Company.FreeOrders)
-                OrigFreeOrders.Enqueue(ord);
+                OrigFreeOrders.Enqueue(ord.Copy());
         }
         /// <summary>
         /// Востанавливает расписание в изначальный вид.
@@ -62,10 +62,14 @@ namespace Delivery.UE
             }
             Company.RejectedOrders.Clear();
             while (OrigRejectedOrders.Count > 0)
+            {
                 Company.RejectedOrders.Add(OrigRejectedOrders.Dequeue());
+            }
             Company.FreeOrders.Clear();
             while (OrigFreeOrders.Count > 0)
+            {
                 Company.FreeOrders.Push(OrigFreeOrders.Dequeue());
+            }
         }
     }
 }

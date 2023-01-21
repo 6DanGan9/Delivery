@@ -17,6 +17,8 @@ namespace Delivery.UE
 
         public DateTime DeadLine { get; protected set; }
 
+        public Variant ActualeVariant { get; protected set; }
+
         public double Distance { get { return Start.GetDistance(End); } }
 
         public int Coast { get { return GetOrderPrice(); } }
@@ -27,7 +29,6 @@ namespace Delivery.UE
 
         private Queue<Variant> Variants = new();
 
-        protected Variant ActualeVariant;
 
         public static event EventHandler<OrderEventDescriptor> NewOrderEvent;
 
@@ -55,13 +56,23 @@ namespace Delivery.UE
             //Проверка, есть ли у заказа какие-то варианты, если нету, то заказ переходит в список непринятых.
             if (variants.Count == 0)
             {
+                Clear();
                 Company.RejectedOrders.Add(this);
                 return;
             }
             //Подсчёт профитов расписаний при каждом из возможных вариантов расстановки.
             var profits = CalcProfitOfVariants(variants);
-            //Применение варианта с наибольн=шим профитом для расписания.
+            //Если все варианты приведут в ухудшению профита компании, то заказ откланяется.
+            if (profits.Max() < Company.FullProfit())
+            {
+                Clear();
+                Company.RejectedOrders.Add(this);
+                return;
+            }
+            //Применение варианта с наибольшим профитом для расписания.
+            Company.SearchDepthUp();
             UseVariant(variants[profits.IndexOf(profits.Max())]);
+            Company.SearchDepthDown();
         }
         public void Redestribute()
         {
@@ -71,15 +82,23 @@ namespace Delivery.UE
             //Проверка, есть ли у заказа какие-то варианты, если нету, то заказ переходит в список непринятых.
             if (variants.Count == 0)
             {
+                Clear();
                 Company.RejectedOrders.Add(this);
                 return;
             }
-            if(Company.CheckSearchDepth())
+            if (Company.CheckSearchDepth())
             {
-            //Подсчёт профитов расписаний при каждом из возможных вариантов расстановки.
-            var profits = CalcProfitOfVariants(variants);
-            //Применение варианта с наибольн=шим профитом для расписания.
-            UseVariant(variants[profits.IndexOf(profits.Max())]);
+                //Подсчёт профитов расписаний при каждом из возможных вариантов расстановки.
+                var profits = CalcProfitOfVariants(variants);
+                //Если все варианты приведут в ухудшению профита компании, то заказ откланяется.
+                if (profits.Max() < Company.FullProfit())
+                {
+                    Clear();
+                    Company.RejectedOrders.Add(this);
+                    return;
+                }
+                //Применение варианта с наибольшим профитом для расписания.
+                UseVariant(variants[profits.IndexOf(profits.Max())]);
             }
             else
             {
@@ -108,9 +127,39 @@ namespace Delivery.UE
         public Order Copy()
         {
             if (this is OrderForDelivery)
-                return new OrderForDelivery(Id, Start, End, DeadLine, Weigth, Time, ActualeVariant);
+            {
+                var order = new OrderForDelivery(Id, Start, End, DeadLine, Weigth, Time, ActualeVariant);
+                for (var i = 0; i < Company.Orders.Count; i++)
+                {
+                    if (Company.Orders[i].Id == order.Id)
+                    {
+                        Company.Orders[i] = order;
+                        break;
+                    }
+                }
+                return order;
+            }
             else
-                return new OrderForTaking(Id, Start, End, DeadLine, Weigth, Time, ActualeVariant);
+            {
+                var order = new OrderForTaking(Id, Start, End, DeadLine, Weigth, Time, ActualeVariant);
+                for (var i = 0; i < Company.Orders.Count; i++)
+                {
+                    if (Company.Orders[i].Id == order.Id)
+                    {
+                        Company.Orders[i] = order;
+                        break;
+                    }
+                }
+                return order;
+            }
+        }
+        /// <summary>
+        /// Отчищение данных об актуальном варианте и времени доставки.
+        /// </summary>
+        public void Clear()
+        {
+            ActualeVariant = null;
+            Time = TimeSpan.Zero;   
         }
         /// <summary>
         /// Удаление варианта, на котором заказ стоял до перераспределения.

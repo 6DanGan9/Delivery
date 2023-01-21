@@ -36,17 +36,12 @@ namespace Delivery.UE
         //Информация о заказах.
         public static List<Order> Orders = new();
         public static Stack<Order> FreeOrders = new();
+        public static Queue<Order> CanceledOrders = new();
         public static List<Order> RejectedOrders = new();
-        public static List<Order> DelitedOrders = new();
+        public static List<Order> DeletedOrders = new();
         //Глубина просчёта альтернативных расписаний.
         private static int MaxSearchDepth;
         private static int ActualeSearchDepth;
-        
-        public static event EventHandler<OrderEventDescriptor> DeliteOrderEvent;
-
-        public static event EventHandler<CourierEventDescriptor> NewCourierEvent;
-
-        public static event EventHandler<CourierEventDescriptor> DeliteCourierEvent;
 
         public static void StartProgram()
         {
@@ -56,7 +51,7 @@ namespace Delivery.UE
         /// <summary>
         /// Перераспределяет заказы, которые были отправлены на перераспределение.
         /// </summary>
-        public static void DestributeFreeOrders(object? sender, CourierEventDescriptor e)
+        public static void RedestributeFreeOrders(object? sender, CourierEventDescriptor e)
         {
             Console.Write($"На перераспределение направились заказы:");
             foreach (var order in FreeOrders)
@@ -67,6 +62,14 @@ namespace Delivery.UE
                 var order = FreeOrders.Pop();
                 Console.WriteLine($"Перераспределяется заказ №{order.Id}");
                 order.Redestribute();
+            }
+        }
+        internal static void DestributeCenseledOrders(object? sender, CourierEventDescriptor e)
+        {
+            while (CanceledOrders.Count > 0)
+            {
+                var order = CanceledOrders.Dequeue();
+                order.Destribute();
             }
         }
         /// <summary>
@@ -159,40 +162,51 @@ namespace Delivery.UE
                 switch (command1)
                 {
                     case "1":
-                    Console.WriteLine($"Введите тип заказа: Доставить(1)/Забрать(2)");
-                    string command2 = Console.ReadLine();
-                    if (command2 == "1")
-                    {
-                        var orderD = OrderForDelivery.NewOrder(orderNum);
-                        var order = (Order)orderD;
-                        order.Destribute();
-                        orderNum++;
-                    }
-                    else if (command2 == "2")
-                    {
-                        var orderT = OrderForTaking.NewOrder(orderNum);
-                        var order = (Order)orderT;
-                        Orders.Add(order);
-                        order.Destribute();
-                        orderNum++;
-                    }
-                    GetInfo();
+                        Console.WriteLine($"Введите тип заказа: Доставить(1)/Забрать(2)");
+                        string command2 = Console.ReadLine();
+                        if (command2 == "1")
+                        {
+                            var orderD = OrderForDelivery.NewOrder(orderNum);
+                            var order = (Order)orderD;
+                            order.Destribute();
+                            orderNum++;
+                        }
+                        else if (command2 == "2")
+                        {
+                            var orderT = OrderForTaking.NewOrder(orderNum);
+                            var order = (Order)orderT;
+                            Orders.Add(order);
+                            order.Destribute();
+                            orderNum++;
+                        }
+                        EndCommand();
                         break;
                     case "2":
-                        //Console.WriteLine("Введите ID заказа, который хотите удалить");
-                        //Company.DeliteOrder(int.Parse(Console.ReadLine()));
-                        //GetInfo();
+                        Console.WriteLine("Введите ID заказа, который хотите удалить");
+                        DeliteOrder(int.Parse(Console.ReadLine()));
+                        EndCommand();
                         break;
                     case "3":
                         //Company.AddCourier();
                         //GetInfo();
                         break;
                     case "4":
-                        //foreach (var cour in Company.Couriers)
-                        //    Console.WriteLine($"{cour.Name} ({cour.CourierID})");
-                        //Console.WriteLine("Введите ID курьера");
-                        //Company.DeliteCourier(int.Parse(Console.ReadLine()));
-                        //GetInfo();
+                        foreach (var cour in Couriers)
+                            Console.WriteLine($"{cour.Name} (ID:{cour.CourierID})");
+                        Console.WriteLine("Введите ID курьера которого хотите удалить.");
+                        var id = int.Parse(Console.ReadLine());
+                        bool correct = false;
+                        foreach(var courier in Couriers)
+                            if (courier.CourierID == id)
+                            {
+                                correct = true;
+                                break;
+                            }
+                        if (correct)
+                            DeliteCourier(id);
+                        else
+                            Console.WriteLine("ID введён некорректно.");
+                        GetInfo();
                         break;
                     case "5":
                         SetSearchDepth();
@@ -207,6 +221,19 @@ namespace Delivery.UE
             }
         }
 
+        /// <summary>
+        /// Попытка восстановить отказанные заказы и вывод информации.
+        /// </summary>
+        private static void EndCommand()
+        {
+            var rejectedOrders = new Queue<Order>();
+            foreach (var order in RejectedOrders)
+                rejectedOrders.Enqueue(order);
+            RejectedOrders.Clear();
+            while (rejectedOrders.Count > 0)
+                rejectedOrders.Dequeue().Destribute();
+            GetInfo();
+        }
         /// <summary>
         /// Показывает текущую информацию о курьерах и заказах.
         /// </summary>
@@ -235,12 +262,12 @@ namespace Delivery.UE
                 }
                 Console.WriteLine(".");
             }
-            if (DelitedOrders.Count > 0)
+            if (DeletedOrders.Count > 0)
             {
                 Console.Write($"Удалённые заказы:");
-                for (int i = 0; i < DelitedOrders.Count; i++)
+                for (int i = 0; i < DeletedOrders.Count; i++)
                 {
-                    Console.Write($" {DelitedOrders[i].Id}");
+                    Console.Write($" {DeletedOrders[i].Id}");
                 }
                 Console.WriteLine(".");
             }
@@ -255,6 +282,85 @@ namespace Delivery.UE
         {
             Console.WriteLine("Введите глубину поиска");
             MaxSearchDepth = int.Parse(Console.ReadLine());
+        }
+        /// <summary>
+        /// Удаление заказа по его ID.
+        /// </summary>
+        private static void DeliteOrder(int id)
+        {
+            foreach (var order in RejectedOrders)
+            {
+                if (order.Id == id)
+                {
+                    DeletedOrders.Add(order);
+                    RejectedOrders.Remove(order);
+                    return;
+                }
+            }
+            foreach (var order in Orders)
+            {
+                if (order.Id == id)
+                {
+                    order.ActualeVariant.Courier.DeleteOrder(order);
+                    return;
+                }
+            }
+        }
+        /// <summary>
+        /// Удаление курьера по его ID
+        /// </summary>
+        private static void DeliteCourier(int id)
+        {
+            Courier delCourier = null;
+            Queue<Courier> couriers = new();
+            foreach (var courier in Couriers)
+                couriers.Enqueue(courier);
+            QuantityC--;
+            Couriers = new Courier[QuantityC];
+            int i = 0;
+            while (couriers.Count > 0)
+            {
+                var courier = couriers.Dequeue();
+                if (courier.CourierID != id)
+                {
+                    Couriers[i] = courier;
+                    i++;
+                }
+                else
+                    delCourier = courier;
+            }
+            delCourier.CancelAllOrders();
+        }
+        /// <summary>
+        /// Удаление курьера по его ID
+        /// </summary>
+        private static void CreateNewCourier()
+        {
+            Console.WriteLine("Выберете тип курьера: Пеший(1)/На велосипеде(2)/На скутере(3)/На машине(4)");
+            var command = Console.ReadLine();
+            Courier newCourier;
+            switch (command)
+            {
+                case "1":
+                    quantityFC++;
+                    newCourier = new FootCourier(quantityFC);
+                    break;
+                case "2":
+                    quantityBC++;
+                    newCourier = new BikeCourier(quantityBC);
+                    break;
+                case "3":
+                    quantitySC++;
+                    newCourier = new ScuterCourier(quantitySC);
+                    break;
+                case "4":
+                    quantityCC++;
+                    newCourier = new CarCourier(quantityCC);
+                    break;
+                default:
+                    Console.WriteLine("Команда введена некоректно.");
+                    break;
+            }
         }
     }
 }

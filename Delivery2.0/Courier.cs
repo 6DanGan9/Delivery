@@ -34,6 +34,8 @@ namespace Delivery.UE
 
         public event EventHandler<CourierEventDescriptor> DismissFreeOrder;
 
+        public event EventHandler<CourierEventDescriptor> DismissCanceledOrder;
+
         /// <summary>
         /// Считает суммарное время, которое курьер потратит на выполнение всех заказов в его списке заказов.
         /// </summary>
@@ -100,6 +102,15 @@ namespace Delivery.UE
             return dateTime;
         }
         /// <summary>
+        /// Изначальная инициальзация курьера.
+        /// </summary>
+        public void Intilize()
+        {
+            Order.NewOrderEvent += NewOrderEventComeEventHandler;
+            DismissFreeOrder += Company.RedestributeFreeOrders;
+            DismissCanceledOrder += Company.DestributeCenseledOrders;
+        }
+        /// <summary>
         /// Все заказы начиная с того, вместо которого хочет встать заказ, переходят в список свободных заказов, а заказ встаёт на их место.
         /// </summary>
         public void AttachingOrder(Order order, Variant variant)
@@ -111,7 +122,7 @@ namespace Delivery.UE
             for (int i = 0; i < quantityOrders; i++)
             {
                 Company.FreeOrders.Push(Orders.Last());
-                Orders.RemoveAt(Orders.Count - 1);
+                Orders.Remove(Orders.Last());
             }
             //Подсчём времени на выполнение заказа.
             TimeSpan time;
@@ -130,12 +141,40 @@ namespace Delivery.UE
             UnlockVariant(variant);
         }
         /// <summary>
-        /// Изначальная инициальзация курьера.
+        /// Удаляет заказ, а заказы, стоящие после него отправляет на перераспределение.
         /// </summary>
-        public void Intilize()
+        public void DeleteOrder(Order order)
         {
-            Order.NewOrderEvent += NewOrderEventComeEventHandler;
-            DismissFreeOrder += Company.DestributeFreeOrders;
+            Company.DeletedOrders.Add(order);
+            while (order.Id != Orders.Last().Id)
+            {
+                Company.FreeOrders.Push(Orders.Last());
+                Orders.Remove(Orders.Last());
+            }
+            Orders.Remove(Orders.Last());
+            DismissFreeOrder.Invoke(this, new CourierEventDescriptor { Courier = this });
+        }
+        /// <summary>
+        /// Отправляет все заказы на перераспределение
+        /// </summary>
+        public void CancelAllOrders()
+        {
+            while(Orders.Count > 0)
+            {
+                Orders.Last().Clear();
+                Company.CanceledOrders.Enqueue(Orders.Last());
+                Orders.Remove(Orders.Last());
+            }
+            UnIntilize();
+            DismissCanceledOrder.Invoke(this, new CourierEventDescriptor { Courier = this });
+        }
+        /// <summary>
+        /// Разинициализация.
+        /// </summary>
+        public void UnIntilize()
+        {
+            Order.NewOrderEvent -= NewOrderEventComeEventHandler;
+            DismissFreeOrder -= Company.RedestributeFreeOrders;
         }
         /// <summary>
         /// Проверяет, может ли курьер выполнить данный заказ.
