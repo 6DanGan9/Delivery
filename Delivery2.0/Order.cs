@@ -77,7 +77,7 @@ namespace Delivery.UE
         public void Redestribute()
         {
             var variants = CollectingVariants();
-            //Удаление последнего варианта расстановки, и варианта, который проверяет заказ в данный момент.
+            //Удаление последнего варианта расстановки.
             RemoveActualeVariants(variants);
             //Проверка, есть ли у заказа какие-то варианты, если нету, то заказ переходит в список непринятых.
             if (variants.Count == 0)
@@ -105,6 +105,25 @@ namespace Delivery.UE
                 var variantss = variants.OrderByDescending(x => x.Profit);
                 UseVariant(variantss.First());
             }
+        }
+        /// <summary>
+        /// Заказ пробует поменять свою позицию.
+        /// </summary>
+        public bool TryRedestribute()
+        {
+            var variants = CollectingVariants();
+            List<Variant> usefullVariants = new();
+            foreach(var variant in variants)
+            {
+                if(variant.Profit > ActualeVariant.Profit)
+                    usefullVariants.Add(variant);
+            }
+            if (usefullVariants.Count == 0)
+                return false;
+            ActualeVariant.Courier.CancelLastOrder();
+            var variantss = usefullVariants.OrderByDescending(x => x.Profit);
+            UseVariant(variantss.First());
+            return true;
         }
         /// <summary>
         /// Установка нового актуального варианта.

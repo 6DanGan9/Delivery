@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.Metrics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -42,6 +43,7 @@ namespace Delivery.UE
         //Глубина просчёта альтернативных расписаний.
         private static int MaxSearchDepth;
         private static int ActualeSearchDepth;
+        public const int SearchDepthOfTryRedestribute = 0;
 
         public static void StartProgram()
         {
@@ -88,7 +90,7 @@ namespace Delivery.UE
         /// </summary>
         public static bool CheckSearchDepth()
         {
-            if (ActualeSearchDepth <= MaxSearchDepth)
+            if (ActualeSearchDepth < MaxSearchDepth)
                 return true;
             else
                 return false;
@@ -187,8 +189,9 @@ namespace Delivery.UE
                         EndCommand();
                         break;
                     case "3":
-                        //Company.AddCourier();
-                        //GetInfo();
+                        CreateNewCourier();
+                        TryRedestributeLastOrders();
+                        EndCommand();
                         break;
                     case "4":
                         foreach (var cour in Couriers)
@@ -196,7 +199,7 @@ namespace Delivery.UE
                         Console.WriteLine("Введите ID курьера которого хотите удалить.");
                         var id = int.Parse(Console.ReadLine());
                         bool correct = false;
-                        foreach(var courier in Couriers)
+                        foreach (var courier in Couriers)
                             if (courier.CourierID == id)
                             {
                                 correct = true;
@@ -220,7 +223,39 @@ namespace Delivery.UE
                 }
             }
         }
-
+        /// <summary>
+        /// Все заказы пробуют перераспределиться.
+        /// </summary>
+        private static void TryRedestributeLastOrders()
+        {
+            //Сохраняем изначальную глубину просчёта, затем ставим глубину на константовое значение глубины просчёта при попытке перераспредидении всех заказов.
+            var maxSearchDepth = MaxSearchDepth;
+            MaxSearchDepth = SearchDepthOfTryRedestribute;
+            bool end = false;
+            //Пробуем перераспределить заказы, если заказ перераспределяется, то начинаем перебор сначала с новыми условиями.
+            while (!end)
+            {
+                int countLastOrders = 0;
+                foreach (var courier in Couriers)
+                {
+                    if (courier.Orders.Count > 0)
+                        countLastOrders++;
+                }
+                int i = 0;
+                foreach (var courier in Couriers)
+                {
+                    if (courier.Orders.Count > 0)
+                        if (courier.Orders.Last().TryRedestribute())
+                            break;
+                        else
+                            i++;
+                }
+                if (i == countLastOrders)
+                    end = true;
+            }
+            //Возвращяем изначальную глубину просчёта.
+            MaxSearchDepth = maxSearchDepth;
+        }
         /// <summary>
         /// Попытка восстановить отказанные заказы и вывод информации.
         /// </summary>
@@ -292,6 +327,7 @@ namespace Delivery.UE
             {
                 if (order.Id == id)
                 {
+                    Orders.Remove(order);
                     DeletedOrders.Add(order);
                     RejectedOrders.Remove(order);
                     return;
@@ -301,6 +337,7 @@ namespace Delivery.UE
             {
                 if (order.Id == id)
                 {
+                    Orders.Remove(order);
                     order.ActualeVariant.Courier.DeleteOrder(order);
                     return;
                 }
@@ -332,35 +369,53 @@ namespace Delivery.UE
             delCourier.CancelAllOrders();
         }
         /// <summary>
-        /// Удаление курьера по его ID
+        /// Создание нового курьера.
         /// </summary>
         private static void CreateNewCourier()
         {
             Console.WriteLine("Выберете тип курьера: Пеший(1)/На велосипеде(2)/На скутере(3)/На машине(4)");
             var command = Console.ReadLine();
-            Courier newCourier;
+            Courier newCourier = null;
             switch (command)
             {
                 case "1":
-                    quantityFC++;
-                    newCourier = new FootCourier(quantityFC);
+                    newCourier = new FootCourier(quantityFC++);
                     break;
                 case "2":
-                    quantityBC++;
-                    newCourier = new BikeCourier(quantityBC);
+                    newCourier = new BikeCourier(quantityBC++);
                     break;
                 case "3":
-                    quantitySC++;
-                    newCourier = new ScuterCourier(quantitySC);
+                    newCourier = new ScuterCourier(quantitySC++);
                     break;
                 case "4":
-                    quantityCC++;
-                    newCourier = new CarCourier(quantityCC);
+                    newCourier = new CarCourier(quantityCC++);
                     break;
                 default:
                     Console.WriteLine("Команда введена некоректно.");
                     break;
             }
+            CouriersList.Add(newCourier);
+            newCourier.Intilize();
+            AddCourier(newCourier);
+        }
+        /// <summary>
+        /// Добавление нового курьера в массив курьеров.
+        /// </summary>
+        private static void AddCourier(Courier newCourier)
+        {
+            Queue<Courier> couriers = new();
+            foreach (var courier in Couriers)
+                couriers.Enqueue(courier);
+            QuantityC++;
+            Couriers = new Courier[QuantityC];
+            int i = 0;
+            while (couriers.Count > 0)
+            {
+                var courier = couriers.Dequeue();
+                Couriers[i] = courier;
+                i++;
+            }
+            Couriers[i] = newCourier;
         }
     }
 }

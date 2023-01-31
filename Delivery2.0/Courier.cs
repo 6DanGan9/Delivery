@@ -157,9 +157,16 @@ namespace Delivery.UE
         /// <summary>
         /// Отправляет все заказы на перераспределение
         /// </summary>
+        public void CancelLastOrder()
+        {
+            Orders.Remove(Orders.Last());
+        }
+        /// <summary>
+        /// Отправляет все заказы на перераспределение
+        /// </summary>
         public void CancelAllOrders()
         {
-            while(Orders.Count > 0)
+            while (Orders.Count > 0)
             {
                 Orders.Last().Clear();
                 Company.CanceledOrders.Enqueue(Orders.Last());
@@ -221,6 +228,16 @@ namespace Delivery.UE
                 coords.Add(Start);
                 foreach (var ord in Orders)
                     coords.Add(ord.End);
+                //Сбор списка вариантов, которые курьер может предложить заказу.
+                for (int i = 0; i < coords.Count; i++)
+                {
+                    if (CanCarry(order, i))
+                    {
+                        int profit = (int)Math.Round(order.Coast - (coords[i].GetAllDistance(order)) * Price);
+                        var variant = new Variant(this, profit, i);
+                        variants.Add(variant);
+                    }
+                }
             }
             else
             {
@@ -228,18 +245,14 @@ namespace Delivery.UE
                     coords.Add(Orders.Last().End);
                 else
                     coords.Add(Start);
-            }
-            Console.WriteLine($"{Name}: Получил событие появления Заказа: {order.Id}");
-            //Сбор списка вариантов, которые курьер может предложить заказу.
-            for (int i = 0; i < coords.Count; i++)
-            {
-                if (CanCarry(order, i))
+                if (CanCarry(order, Orders.Count))
                 {
-                    int profit = (int)Math.Round(order.Coast - (coords[i].GetAllDistance(order)) * Price);
-                    var variant = new Variant(this, profit, i);
+                    int profit = (int)Math.Round(order.Coast - (coords[0].GetAllDistance(order)) * Price);
+                    var variant = new Variant(this, profit, Orders.Count);
                     variants.Add(variant);
                 }
             }
+            Console.WriteLine($"{Name}: Получил событие появления Заказа: {order.Id}");
             //Удаление вариантов с отрицательным профитом и вариантов, которые заблокированы.
             if (variants != null)
                 foreach (var variant in variants.ToList())
