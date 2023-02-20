@@ -36,5 +36,13 @@ namespace Delivery.UE
                 + Math.Pow(coord.Y - order.Start.Y, 2))
                 + order.Distance;
         }
+        public static Coord NewCoord(string coord)
+        {
+            int a, b;
+            int p = coord.IndexOf(' ');
+            a = int.Parse(coord.Substring(p + 1));
+            b = int.Parse(coord.Substring(0, p));
+            return new Coord(b, a);
+        }
     }
 }

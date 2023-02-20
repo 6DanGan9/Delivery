@@ -45,8 +45,13 @@ namespace Delivery.UE
         private static int ActualeSearchDepth;
         public const int SearchDepthOfTryRedestribute = 0;
 
+
+        private static bool CreateFromExcel = false;
         public static void StartProgram()
         {
+            Console.WriteLine("Если хотите считывать курьеров и заказы из Excel нажмите (+).");
+            if (Console.ReadLine() == "+")
+                CreateFromExcel = true;
             CreateCouriersList();
             WaitCommand();
         }
@@ -119,28 +124,40 @@ namespace Delivery.UE
             quantityFC = int.Parse(Console.ReadLine());
             for (int i = 0; i < quantityFC; i++)
             {
-                CouriersList.Add(new FootCourier(i));
+                if (CreateFromExcel)
+                    CouriersList.Add(FootCourier.NewCourierFromExcel(i));
+                else
+                    CouriersList.Add(new FootCourier(i));
             }
             //Добавляет заданное кол-во курьеров на велосипедах.
             Console.WriteLine("Введите количество курьеров на велосипедах.");
             quantityBC = int.Parse(Console.ReadLine());
             for (int i = 0; i < quantityBC; i++)
             {
-                CouriersList.Add(new BikeCourier(i));
+                if (CreateFromExcel)
+                    CouriersList.Add(BikeCourier.NewCourierFromExcel(i));
+                else
+                    CouriersList.Add(new BikeCourier(i));
             }
             //Добавляет заданное кол-во курьеров на скутерах.
             Console.WriteLine("Введите количество курьеров на скутерах.");
             quantitySC = int.Parse(Console.ReadLine());
             for (int i = 0; i < quantitySC; i++)
             {
-                CouriersList.Add(new ScuterCourier(i));
+                if (CreateFromExcel)
+                    CouriersList.Add(ScuterCourier.NewCourierFromExcel(i));
+                else
+                    CouriersList.Add(new ScuterCourier(i));
             }
             //Добавляет заданное кол-во курьеров на машинах.
             Console.WriteLine("Введите количество курьеров на машинах.");
             quantityCC = int.Parse(Console.ReadLine());
             for (int i = 0; i < quantityCC; i++)
             {
-                CouriersList.Add(new CarCourier(i));
+                if (CreateFromExcel)
+                    CouriersList.Add(CarCourier.NewCourierFromExcel(i));
+                else
+                    CouriersList.Add(new CarCourier(i));
             }
             //Считает общее кол-во курьеров и переделывает список в массив.
             QuantityC = quantityFC + quantityBC + quantitySC + quantityCC;
@@ -168,14 +185,22 @@ namespace Delivery.UE
                         string command2 = Console.ReadLine();
                         if (command2 == "1")
                         {
-                            var orderD = OrderForDelivery.NewOrder(orderNum);
+                            OrderForDelivery orderD;
+                            if (CreateFromExcel)
+                                orderD = OrderForDelivery.NewOrderFromExcel(orderNum);
+                            else
+                                orderD = OrderForDelivery.NewOrder(orderNum);
                             var order = (Order)orderD;
                             order.Destribute();
                             orderNum++;
                         }
                         else if (command2 == "2")
                         {
-                            var orderT = OrderForTaking.NewOrder(orderNum);
+                            OrderForTaking orderT;
+                            if (CreateFromExcel)
+                                orderT = OrderForTaking.NewOrderFromExcel(orderNum);
+                            else
+                                orderT = OrderForTaking.NewOrder(orderNum);
                             var order = (Order)orderT;
                             Orders.Add(order);
                             order.Destribute();
