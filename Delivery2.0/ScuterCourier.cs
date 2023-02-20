@@ -27,7 +27,6 @@ namespace Delivery.UE
         {
             CourierID = Company.CouriersList.Count;
             Name = $"Курьер на скутере № {num + 1}";
-            Console.WriteLine("Введите координаты местонахождения курьера через пробел(x y).");
             Start = start;
             Speed = Company.DefaultScuterCurierSpeed;
             Capacity = Company.DefaultScuterCurierCapacity;
@@ -39,6 +38,7 @@ namespace Delivery.UE
             excel.Open("Couriers");
             if (excel.Get(ExcelLine, 2) == "")
             {
+                excel.Close();
                 Console.WriteLine("В файле закончились куриеры, задайте координаты курьера вручную.");
                 return new ScuterCourier(num);
             }

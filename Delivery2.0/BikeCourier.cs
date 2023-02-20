@@ -38,6 +38,7 @@ namespace Delivery.UE
             excel.Open("Couriers");
             if (excel.Get(ExcelLine, 2) == "")
             {
+                excel.Close();
                 Console.WriteLine("В файле закончились куриеры, задайте координаты курьера вручную.");
                 return new BikeCourier(num);
             }
