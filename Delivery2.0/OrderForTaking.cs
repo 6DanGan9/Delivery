@@ -30,38 +30,58 @@ namespace Delivery.UE
             Start = start;
             End = end;
             Weigth = weigth;
-            DeadLine = DateTime.Today + TimeCalculator.TimeToMinute(deadline)/*TimeSpan.FromMinutes(rnd.Next(600, 1439))*/;
+            if (deadline == null)
+                DeadLine = DateTime.Today + TimeSpan.FromMinutes(rnd.Next(600, 1439));
+            else
+                DeadLine = DateTime.Today + TimeCalculator.TimeToMinute(deadline);
             Console.WriteLine(DeadLine);
         }
         /// <summary>
         /// Создание нового заказа.
         /// </summary>
-        public static OrderForTaking NewOrder(int OrderNumber)
+        public static OrderForTaking NewOrder(int orderNumber)
         {
             Console.WriteLine("Введите координаты начала через пробел(x y).");
-            Coord start = CoordHelper.NewCoord(Console.ReadLine()); /*CoordHelper.RandCoord();*/
-            //Console.WriteLine($"{start.X}, {start.Y}");
+            Coord start = CoordHelper.NewCoord(Console.ReadLine());
             Console.WriteLine("Введите координаты конца через пробел(x y).");
-            Coord end = CoordHelper.NewCoord(Console.ReadLine()); /*CoordHelper.RandCoord();*/
-            //Console.WriteLine($"{end.X}, {end.Y}");
+            Coord end = CoordHelper.NewCoord(Console.ReadLine());
             Console.WriteLine("Введите массу груза.");
-            //Console.WriteLine("3");
-            double weigth = /*3;*/int.Parse(Console.ReadLine());
+            double weigth = int.Parse(Console.ReadLine());
             Console.WriteLine("Введите конечное время в формате 00:00.");
-            string time = /*"00:00";*/ Console.ReadLine();
-            OrderForTaking order = new(OrderNumber, start, end, time, weigth);
+            string time = Console.ReadLine();
+            OrderForTaking order = new(orderNumber, start, end, time, weigth);
+            Company.Orders.Add(order);
+            return order;
+        }
+        /// <summary>
+        /// Создание нового заказа.
+        /// </summary>
+        public static OrderForTaking NewRandomOrder(int orderNumber)
+        {
+            Coord start = CoordHelper.RandCoord();
+            Console.WriteLine($"{start.X}, {start.Y}");
+            Coord end = CoordHelper.RandCoord();
+            Console.WriteLine($"{end.X}, {end.Y}");
+            Console.WriteLine("3");
+            double weigth = 3;
+            string time = null;
+            OrderForTaking order = new(orderNumber, start, end, time, weigth);
             Company.Orders.Add(order);
             return order;
         }
 
-        public static OrderForTaking NewOrderFromExcel(int OrderNumber)
+        public static OrderForTaking NewOrderFromExcel(int orderNumber)
         {
             var excel = new ExcelHelper();
             excel.Open("OrdersForTaking");
             if (excel.Get(ExcelLine, 1) == "")
             {
-                Console.WriteLine("В файле заказов больше нету, создайте заказ вручную.");
-                return NewOrder(OrderNumber);
+                Console.WriteLine("В файле заказов больше нету, создайте новый заказ.");
+                Console.WriteLine("Если хотите создать случайный заказ нажмите (+).");
+                if (Console.ReadLine() == "+")
+                    return NewRandomOrder(orderNumber);
+                else
+                    return NewOrder(orderNumber);
             }
             else
             {
@@ -70,7 +90,7 @@ namespace Delivery.UE
                 double weigth = Convert.ToInt32(excel.Get(ExcelLine, 6));
                 string time = excel.Get(ExcelLine, 7);
                 excel.Close();
-                OrderForTaking order = new(OrderNumber, start, end, time, weigth);
+                OrderForTaking order = new(orderNumber, start, end, time, weigth);
                 Company.Orders.Add(order);
                 ExcelLine++;
                 return order;

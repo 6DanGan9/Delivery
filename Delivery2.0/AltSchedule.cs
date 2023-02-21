@@ -22,6 +22,8 @@ namespace Delivery.UE
             SaveOriginalSchedule();
             //Исполняем выбранный вариант.
             order.UseVariant(variant);
+            if (Company.FreeOrders.Count > 0)
+                Company.RedestributeFreeOrders();
             //Считаем профит полученного расписания.
             int profit = Company.FullProfit();
             //Восстанавливаем расписание.

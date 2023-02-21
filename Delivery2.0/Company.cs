@@ -45,8 +45,8 @@ namespace Delivery.UE
         private static int ActualeSearchDepth;
         public const int SearchDepthOfTryRedestribute = 0;
 
-
         private static bool CreateFromExcel = false;
+
         public static void StartProgram()
         {
             Console.WriteLine("Если хотите считывать курьеров и заказы из Excel нажмите (+).");
@@ -54,6 +54,22 @@ namespace Delivery.UE
                 CreateFromExcel = true;
             CreateCouriersList();
             WaitCommand();
+        }
+        /// <summary>
+        /// Перераспределяет заказы, которые были отправлены на перераспределение.
+        /// </summary>
+        public static void RedestributeFreeOrders()
+        {
+            Console.Write($"На перераспределение направились заказы:");
+            foreach (var order in FreeOrders)
+                Console.Write($"{order.Id} ");
+            Console.WriteLine(".");
+            while (FreeOrders.Count > 0)
+            {
+                var order = FreeOrders.Pop();
+                Console.WriteLine($"Перераспределяется заказ №{order.Id}");
+                order.Redestribute();
+            }
         }
         /// <summary>
         /// Перераспределяет заказы, которые были отправлены на перераспределение.
@@ -176,7 +192,7 @@ namespace Delivery.UE
             SetSearchDepth();
             while (orderNum > 0)
             {
-                Console.WriteLine($"Введите действие: Добавить заказ(1)/Удалить Заказ(2)/Добавить курьера(3)/Удалить курьера(4)/Изменить глубину поиска(5)/Закончить работу(6)");
+                Console.WriteLine($"Введите действие: Добавить заказ(1)/Удалить Заказ(2)/Добавить курьера(3)/Удалить курьера(4)/Изменить глубину поиска(5)/Прекратить(Продолжить) считывание из Excel(6)/Закончить работу(7)");
                 string command1 = Console.ReadLine();
                 switch (command1)
                 {
@@ -189,7 +205,13 @@ namespace Delivery.UE
                             if (CreateFromExcel)
                                 orderD = OrderForDelivery.NewOrderFromExcel(orderNum);
                             else
-                                orderD = OrderForDelivery.NewOrder(orderNum);
+                            {
+                                Console.WriteLine("Если хотите создать случайный заказ нажмите (+).");
+                                if (Console.ReadLine() == "+")
+                                    orderD = OrderForDelivery.NewRandomOrder(orderNum);
+                                else
+                                    orderD = OrderForDelivery.NewOrder(orderNum);
+                            }
                             var order = (Order)orderD;
                             order.Destribute();
                             orderNum++;
@@ -200,7 +222,13 @@ namespace Delivery.UE
                             if (CreateFromExcel)
                                 orderT = OrderForTaking.NewOrderFromExcel(orderNum);
                             else
-                                orderT = OrderForTaking.NewOrder(orderNum);
+                            {
+                                Console.WriteLine("Если хотите создать случайный заказ нажмите (+).");
+                                if (Console.ReadLine() == "+")
+                                    orderT = OrderForTaking.NewRandomOrder(orderNum);
+                                else
+                                    orderT = OrderForTaking.NewOrder(orderNum);
+                            }
                             var order = (Order)orderT;
                             Orders.Add(order);
                             order.Destribute();
@@ -240,6 +268,9 @@ namespace Delivery.UE
                         SetSearchDepth();
                         break;
                     case "6":
+                        CreateFromExcel = !CreateFromExcel;
+                        break;
+                    case "7":
                         orderNum = 0;
                         break;
                     default:
@@ -404,16 +435,28 @@ namespace Delivery.UE
             switch (command)
             {
                 case "1":
-                    newCourier = new FootCourier(quantityFC++);
+                    if (CreateFromExcel)
+                        newCourier = FootCourier.NewCourierFromExcel(quantityFC++);
+                    else
+                        newCourier = new FootCourier(quantityFC++);
                     break;
                 case "2":
-                    newCourier = new BikeCourier(quantityBC++);
+                    if (CreateFromExcel)
+                        newCourier = BikeCourier.NewCourierFromExcel(quantityBC++);
+                    else
+                        newCourier = new BikeCourier(quantityBC++);
                     break;
                 case "3":
-                    newCourier = new ScuterCourier(quantitySC++);
+                    if (CreateFromExcel)
+                        newCourier = ScuterCourier.NewCourierFromExcel(quantitySC++);
+                    else
+                        newCourier = new ScuterCourier(quantitySC++);
                     break;
                 case "4":
-                    newCourier = new CarCourier(quantityCC++);
+                    if (CreateFromExcel)
+                        newCourier = CarCourier.NewCourierFromExcel(quantityCC++);
+                    else
+                        newCourier = new CarCourier(quantityCC++);
                     break;
                 default:
                     Console.WriteLine("Команда введена некоректно.");

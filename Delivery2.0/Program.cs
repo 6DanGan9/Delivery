@@ -6,7 +6,8 @@ namespace Delivery.UE
     {
         static void Main(string[] args)
         {
-            Console.WriteLine("Карта 15:15, начало рабочего дня курьеров с 8:00, окончание в 24:00(3 смены по 8 часов).");
+            Console.WriteLine("Размеры карты: 15:15.");
+            Console.WriteLine("Курьеры работают в 3 смены (8ч-16ч / 12ч-20ч / 16ч-24ч)");
             Company.StartProgram();
         }
     }
