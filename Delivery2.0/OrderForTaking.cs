@@ -34,7 +34,6 @@ namespace Delivery.UE
                 DeadLine = DateTime.Today + TimeSpan.FromMinutes(rnd.Next(600, 1439));
             else
                 DeadLine = DateTime.Today + TimeCalculator.TimeToMinute(deadline);
-            Console.WriteLine(DeadLine);
         }
         /// <summary>
         /// Создание нового заказа.
@@ -66,6 +65,7 @@ namespace Delivery.UE
             double weigth = 3;
             string time = null;
             OrderForTaking order = new(orderNumber, start, end, time, weigth);
+            Console.WriteLine(order.DeadLine);
             Company.Orders.Add(order);
             return order;
         }
@@ -77,6 +77,7 @@ namespace Delivery.UE
             if (excel.Get(ExcelLine, 1) == "")
             {
                 Console.WriteLine("В файле заказов больше нету, создайте новый заказ.");
+                excel.Close();
                 Console.WriteLine("Если хотите создать случайный заказ нажмите (+).");
                 if (Console.ReadLine() == "+")
                     return NewRandomOrder(orderNumber);

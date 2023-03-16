@@ -22,9 +22,9 @@ namespace Excel
             _workbook = _excel.Workbooks.Open(Path.Combine(Environment.CurrentDirectory, filePath));
         }
 
-        internal void Set(int column, int row, Object data)
+        internal void Set(int row, int column, object data)
         {
-            ((Exxcel.Worksheet)_excel.ActiveSheet).Cells[row, ColumnToString(column)] = data;
+            ((Exxcel.Worksheet)_excel.ActiveSheet).Cells[row, ColumnToString(column)] = Convert.ToString(data);
         }
 
         internal string Get(int row, int column)
@@ -33,12 +33,18 @@ namespace Excel
             return data;
         }
 
+        internal void Save()
+        {
+            _workbook.Save();
+        }
+
         public void Dispose()
         {
         }
 
         public void Close()
         {
+            _workbook.Save();
             _workbook.Close();
             System.Diagnostics.Process.GetProcessesByName("EXCEL").Last().Kill();
         }

@@ -132,7 +132,6 @@ namespace Delivery.UE
                 time = TimeCalculator.TimeToCompliteOrder(order, this, Start);
             //Установка нового актуального варианта заказа.
             order.SetActualeVariant(variant, time);
-            Console.WriteLine($"Kyp {Name} добавляет заказ {order.Id} на {variant.NumberPriorityCoord} место");
             //Добавление заказа в список выполняемых.
             Orders.Add(order);
             //Сообщение о том, что какие-то заказ были направлены на перераспределение.
@@ -182,6 +181,17 @@ namespace Delivery.UE
         {
             Order.NewOrderEvent -= NewOrderEventComeEventHandler;
             DismissFreeOrder -= Company.RedestributeFreeOrders;
+        }
+
+        public double Efficacy()
+        {
+            double usefullTime = 0;
+            double usefullDistance = 0;
+            for (int i = 0; i < Orders.Count; i++)
+                usefullDistance += Orders[i].Distance;
+            usefullTime = usefullDistance / Speed * 60;
+            double allTime = CalculateBusyTime().TotalMinutes;
+            return usefullTime / allTime;
         }
         /// <summary>
         /// Проверяет, может ли курьер выполнить данный заказ.
@@ -252,7 +262,6 @@ namespace Delivery.UE
                     variants.Add(variant);
                 }
             }
-            Console.WriteLine($"{Name}: Получил событие появления Заказа: {order.Id}");
             //Удаление вариантов с отрицательным профитом и вариантов, которые заблокированы.
             if (variants != null)
                 foreach (var variant in variants.ToList())

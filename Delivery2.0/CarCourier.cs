@@ -27,7 +27,6 @@ namespace Delivery.UE
         {
             CourierID = Company.CouriersList.Count;
             Name = $"Курьер на машине № {num + 1}";
-            Console.WriteLine("Введите координаты местонахождения курьера через пробел(x y).");
             Start = start;
             Speed = Company.DefaultCarCurierSpeed;
             Capacity = Company.DefaultCarCurierCapacity;

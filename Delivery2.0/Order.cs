@@ -197,7 +197,6 @@ namespace Delivery.UE
         /// </summary>
         private List<int> CalcProfitOfVariants(List<Variant> variants)
         {
-            Console.WriteLine($"Заказ {Id} начинает смотреть свои {variants.Count} вариантов");
             List<int> profits = new();
             //Считаем профит каждого варианта.
             foreach (var variant in variants)
@@ -205,7 +204,6 @@ namespace Delivery.UE
                 var altSchedule = new AltSchedule();
                 profits.Add(altSchedule.CalcProfitAltSchedule(this, variant));
             }
-            Console.WriteLine($"Заказ {Id} заканчивает смотреть свои {variants.Count} вариантов");
             return profits;
         }
         /// <summary>

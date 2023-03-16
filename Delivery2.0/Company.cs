@@ -1,6 +1,9 @@
-﻿using System;
+﻿using Excel;
+using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Diagnostics.Metrics;
+using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -46,9 +49,13 @@ namespace Delivery.UE
         public const int SearchDepthOfTryRedestribute = 0;
 
         private static bool CreateFromExcel = false;
+        private static ExcelHelper ResultExcel = new();
+        private static Stopwatch SummTime = new();
 
         public static void StartProgram()
         {
+            ResultExcel.Open("Results");
+            ClearResults();
             Console.WriteLine("Если хотите считывать курьеров и заказы из Excel нажмите (+).");
             if (Console.ReadLine() == "+")
                 CreateFromExcel = true;
@@ -60,14 +67,9 @@ namespace Delivery.UE
         /// </summary>
         public static void RedestributeFreeOrders()
         {
-            Console.Write($"На перераспределение направились заказы:");
-            foreach (var order in FreeOrders)
-                Console.Write($"{order.Id} ");
-            Console.WriteLine(".");
             while (FreeOrders.Count > 0)
             {
                 var order = FreeOrders.Pop();
-                Console.WriteLine($"Перераспределяется заказ №{order.Id}");
                 order.Redestribute();
             }
         }
@@ -76,14 +78,9 @@ namespace Delivery.UE
         /// </summary>
         public static void RedestributeFreeOrders(object? sender, CourierEventDescriptor e)
         {
-            Console.Write($"На перераспределение направились заказы:");
-            foreach (var order in FreeOrders)
-                Console.Write($"{order.Id} ");
-            Console.WriteLine(".");
             while (FreeOrders.Count > 0)
             {
                 var order = FreeOrders.Pop();
-                Console.WriteLine($"Перераспределяется заказ №{order.Id}");
                 order.Redestribute();
             }
         }
@@ -192,25 +189,44 @@ namespace Delivery.UE
             SetSearchDepth();
             while (orderNum > 0)
             {
+                int row = 1;
+                while (ResultExcel.Get(row, 1) != "")
+                {
+                    row++;
+                }
                 Console.WriteLine($"Введите действие: Добавить заказ(1)/Удалить Заказ(2)/Добавить курьера(3)/Удалить курьера(4)/Изменить глубину поиска(5)/Прекратить(Продолжить) считывание из Excel(6)/Закончить работу(7)");
                 string command1 = Console.ReadLine();
                 switch (command1)
                 {
                     case "1":
+                        ResultExcel.Set(row, 1, "Создание заказа");
+                        Stopwatch startTime = new();
                         Console.WriteLine($"Введите тип заказа: Доставить(1)/Забрать(2)");
                         string command2 = Console.ReadLine();
                         if (command2 == "1")
                         {
                             OrderForDelivery orderD;
                             if (CreateFromExcel)
+                            {
+                                startTime.Start();
+                                SummTime.Start();
                                 orderD = OrderForDelivery.NewOrderFromExcel(orderNum);
+                            }
                             else
                             {
                                 Console.WriteLine("Если хотите создать случайный заказ нажмите (+).");
                                 if (Console.ReadLine() == "+")
+                                {
+                                    startTime.Start();
+                                    SummTime.Start();
                                     orderD = OrderForDelivery.NewRandomOrder(orderNum);
+                                }
                                 else
+                                {
+                                    startTime.Start();
+                                    SummTime.Start();
                                     orderD = OrderForDelivery.NewOrder(orderNum);
+                                }
                             }
                             var order = (Order)orderD;
                             order.Destribute();
@@ -220,33 +236,63 @@ namespace Delivery.UE
                         {
                             OrderForTaking orderT;
                             if (CreateFromExcel)
+                            {
+                                startTime.Start();
+                                SummTime.Start();
                                 orderT = OrderForTaking.NewOrderFromExcel(orderNum);
+                            }
                             else
                             {
                                 Console.WriteLine("Если хотите создать случайный заказ нажмите (+).");
                                 if (Console.ReadLine() == "+")
+                                {
+                                    startTime.Start();
+                                    SummTime.Start();
                                     orderT = OrderForTaking.NewRandomOrder(orderNum);
+                                }
                                 else
+                                {
+                                    startTime.Start();
+                                    SummTime.Start();
                                     orderT = OrderForTaking.NewOrder(orderNum);
+                                }
                             }
                             var order = (Order)orderT;
                             Orders.Add(order);
                             order.Destribute();
                             orderNum++;
                         }
+                        SummTime.Stop();
+                        CreateResults(row, startTime);
                         EndCommand();
                         break;
                     case "2":
+                        ResultExcel.Set(row, 1, "Удаление заказа");
+                        startTime = new();
+                        SummTime.Start();
+                        startTime.Start();
                         Console.WriteLine("Введите ID заказа, который хотите удалить");
                         DeliteOrder(int.Parse(Console.ReadLine()));
+                        SummTime.Stop();
+                        CreateResults(row, startTime);
                         EndCommand();
                         break;
                     case "3":
+                        ResultExcel.Set(row, 1, "Создание курьера");
+                        startTime = new();
+                        SummTime.Start();
+                        startTime.Start();
                         CreateNewCourier();
                         TryRedestributeLastOrders();
+                        SummTime.Stop();
+                        CreateResults(row, startTime);
                         EndCommand();
                         break;
                     case "4":
+                        ResultExcel.Set(row, 1, "Удаление курьера");
+                        startTime = new();
+                        SummTime.Start();
+                        startTime.Start();
                         foreach (var cour in Couriers)
                             Console.WriteLine($"{cour.Name} (ID:{cour.CourierID})");
                         Console.WriteLine("Введите ID курьера которого хотите удалить.");
@@ -262,6 +308,8 @@ namespace Delivery.UE
                             DeliteCourier(id);
                         else
                             Console.WriteLine("ID введён некорректно.");
+                        SummTime.Stop();
+                        CreateResults(row, startTime);
                         GetInfo();
                         break;
                     case "5":
@@ -271,6 +319,8 @@ namespace Delivery.UE
                         CreateFromExcel = !CreateFromExcel;
                         break;
                     case "7":
+                        ResultExcel.Set(row, 1, "Окончание работы");
+                        ResultExcel.Close();
                         orderNum = 0;
                         break;
                     default:
@@ -484,6 +534,43 @@ namespace Delivery.UE
                 i++;
             }
             Couriers[i] = newCourier;
+        }
+
+        private static void CreateResults(int row, Stopwatch time)
+        {
+            time.Stop();
+            ResultExcel.Set(row, 2, time.Elapsed);
+            ResultExcel.Set(row, 3, SummTime.Elapsed);
+            ResultExcel.Set(row, 4, FullProfit());
+            int delta;
+            if (row > 2)
+                delta = FullProfit() - Convert.ToInt32(ResultExcel.Get(row - 1, 4));
+            else
+                delta = FullProfit();
+            ResultExcel.Set(row, 5, delta);
+            Stack<double> efficacyCouriers = new();
+            foreach (var courier in Couriers)
+                if (courier.Efficacy() > 0)
+                    efficacyCouriers.Push(courier.Efficacy());
+            double summ = 0;
+            foreach (var efficacy in efficacyCouriers)
+                summ += efficacy;
+            double middleEffficacy = Math.Round(summ / efficacyCouriers.Count, 3);
+            ResultExcel.Set(row, 6, middleEffficacy);
+            double completedOrders = Math.Round(100 - (double)RejectedOrders.Count / Orders.Count * 100, 2);
+            ResultExcel.Set(row, 7, completedOrders);
+            ResultExcel.Save();
+        }
+
+        private static void ClearResults()
+        {
+            int row = 2;
+            while (ResultExcel.Get(row, 1) != "")
+            {
+                for (int i = 1; i <= 7; i++)
+                    ResultExcel.Set(row, i, "");
+                row++;
+            }
         }
     }
 }
